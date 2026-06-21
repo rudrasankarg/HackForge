@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../api';
 import Sidebar from '../../components/Sidebar';
+import { toast } from '../../utils/toast';
 import { 
   Scale, AlertTriangle, Users, Cpu, Layers, Globe, 
   HelpCircle, CheckCircle, ArrowRight, ShieldAlert, Sparkles 
@@ -23,6 +24,17 @@ export default function AdminBiasExplained() {
       .catch((err) => console.error(err))
       .finally(() => setLoadingStats(false));
   }, []);
+
+  const handleResolveAlert = async (alertId) => {
+    try {
+      await api.put(`/analytics/bias-alerts/${alertId}/resolve`);
+      toast.success('Bias anomaly resolved successfully.');
+      const res = await api.get('/analytics/bias-alerts');
+      setAlerts(Array.isArray(res) ? res : []);
+    } catch (err) {
+      toast.error('Failed to resolve bias alert.');
+    }
+  };
 
   // Compute live simulator Z-Scores
   // Reviewers: A (70), B (75), C (68), D (User value), E (70)
@@ -281,6 +293,46 @@ export default function AdminBiasExplained() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Active Unresolved Alerts list */}
+        <div style={{ marginTop: 36 }}>
+          <h2 style={{ fontSize: 15, fontWeight: 700, marginBottom: 16, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Active Unresolved Alerts
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {alerts.filter(a => !a.resolved).length === 0 ? (
+              <div className="card" style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)' }}>
+                No active bias anomalies detected. All grading systems are fully aligned!
+              </div>
+            ) : (
+              alerts.filter(a => !a.resolved).map((alert) => (
+                <div key={alert._id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderLeft: `4px solid var(--${alert.severity === 'high' ? 'danger' : alert.severity === 'medium' ? 'warning' : 'info'})` }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                      <span className={`badge badge-${alert.severity === 'high' ? 'danger' : alert.severity === 'medium' ? 'warning' : 'info'}`} style={{ textTransform: 'uppercase', fontSize: 10 }}>
+                        {alert.severity} Priority
+                      </span>
+                      <strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>
+                        {dimensionFormat(alert.dimension)} Anomaly
+                      </strong>
+                    </div>
+                    <p style={{ margin: '0 0 6px 0', fontSize: 13, color: 'var(--text-secondary)' }}>{alert.description}</p>
+                    <div style={{ fontSize: 11.5, color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                      Detail: {alert.statisticalDetail}
+                    </div>
+                  </div>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    style={{ border: '1px solid var(--border)', padding: '6px 12px', fontSize: 12 }}
+                    onClick={() => handleResolveAlert(alert._id)}
+                  >
+                    Resolve Alert
+                  </button>
+                </div>
+              ))
+            )}
           </div>
         </div>
 

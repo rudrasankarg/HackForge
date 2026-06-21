@@ -22,7 +22,11 @@ async function request(method, path, body) {
     if (!window.location.pathname.includes('/login')) window.location.href = '/login';
   }
 
-  if (!res.ok) throw new Error(data.message || `Error ${res.status}`);
+  if (!res.ok) {
+    const error = new Error(data.message || `Error ${res.status}`);
+    error.status = res.status;
+    throw error;
+  }
   return data;
 }
 
