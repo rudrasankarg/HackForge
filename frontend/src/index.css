@@ -688,6 +688,13 @@ tbody tr:hover td { background: var(--bg-elevated); color: var(--text-primary); 
   background: var(--brand);
   border: 2px solid var(--bg-surface);
   cursor: pointer;
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.15s ease;
+}
+
+.score-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+  background: var(--brand-light);
+  box-shadow: 0 0 10px var(--brand);
 }
 
 /* ---- Divider ---- */
@@ -1176,6 +1183,13 @@ tbody tr:hover td { background: var(--bg-elevated); color: var(--text-primary); 
   border: 2px solid var(--bg-surface);
   box-shadow: 0 0 6px var(--brand-dim);
   cursor: pointer;
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.15s ease;
+}
+
+.score-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+  background: var(--brand-light);
+  box-shadow: 0 0 10px var(--brand);
 }
 
 /* ---- Divider ---- */
