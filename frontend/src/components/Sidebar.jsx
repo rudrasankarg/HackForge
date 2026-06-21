@@ -40,11 +40,13 @@ const NAV_GROUPS = [
     title: 'AI INTELLIGENCE',
     defaultOpen: false,
     items: [
-      { label: 'AI Evaluation',  to: '/admin/evaluation',     icon: BrainCircuit },
-      { label: 'Bias Monitor',   to: '/admin/bias-explained', icon: ShieldAlert },
-      { label: 'Similarity',     to: '/admin/analytics',      icon: Fingerprint },
+      { label: 'AI Evaluation',  to: '/admin/ai-project-evaluation', icon: BrainCircuit },
+      { label: 'Fairness Court', to: '/admin/fairness-court',          icon: Scale },
+      { label: 'Bias Monitor',   to: '/admin/bias-explained',        icon: ShieldAlert },
+      { label: 'Similarity',     to: '/admin/analytics',             icon: Fingerprint },
     ],
   },
+
   {
     key: 'system',
     title: 'SYSTEM',
@@ -77,11 +79,13 @@ export default function Sidebar({ biasAlertCount = 0 }) {
       if (user?.role === 'reviewer') {
         return [
           { label: 'My Assignments', to: '/reviewers', icon: ClipboardList, end: true },
+          { label: 'AI Evaluation', to: '/reviewers/ai-project-evaluation', icon: BrainCircuit },
           { label: 'Announcements', to: '/participant/announcements', icon: Megaphone },
           { label: 'Chat', to: '/participant/chat', icon: UsersRound },
           { label: 'Help Desk', to: '/reviewers/tickets', icon: ClipboardList },
         ];
       }
+
       return [
         { label: 'Dashboard', to: '/participant', icon: Home, end: true },
         { label: 'Hackathons', to: '/participant/hackathons', icon: CalendarDays },

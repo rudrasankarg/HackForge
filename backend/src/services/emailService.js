@@ -158,4 +158,45 @@ const sendResultEmail = async (to, name, rank, score, feedbackText) => {
   await sendEmail(to, 'HackForge — Your Hackathon Results', html);
 };
 
-module.exports = { sendOtpEmail, sendWelcomeEmail, sendResultEmail };
+const sendAiEvaluationEmail = async (to, teamName, projectTitle, scores, strengths, improvements, detailedAnalysis) => {
+  const total = Object.values(scores).reduce((a, b) => a + b, 0);
+  const avg = (total / 5).toFixed(1);
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; color: #111827; background-color: #ffffff;">
+      <div style="margin-bottom: 24px;">
+        <span style="font-size: 20px; font-weight: 700; color: #111827; letter-spacing: -0.5px;">HackForge</span>
+      </div>
+      <div style="height: 1px; background-color: #e5e7eb; margin-bottom: 24px;"></div>
+      <h2 style="font-size: 20px; font-weight: 800; color: #111827; margin: 0 0 12px 0;">AI Project Evaluation Report</h2>
+      <p style="font-size: 15px; line-height: 24px; color: #374151; margin: 0 0 16px 0;">Hello Team ${teamName || 'Hackers'},</p>
+      <p style="font-size: 15px; line-height: 24px; color: #374151; margin: 0 0 16px 0;">Your project <strong>"${projectTitle}"</strong> has been analyzed by our automated AI screening models. Here is the evaluation summary:</p>
+      
+      <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 24px 0;">
+        <h3 style="font-size: 16px; margin-top: 0; color: #111827;">Score Breakdown: ${avg}/10 Average</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr style="border-bottom: 1px solid #e5e7eb;"><td style="padding: 8px 0; font-size: 14px; color: #4b5563;">Innovation</td><td style="padding: 8px 0; text-align: right; font-weight: 700; color: #111827;">${scores.innovation}/10</td></tr>
+          <tr style="border-bottom: 1px solid #e5e7eb;"><td style="padding: 8px 0; font-size: 14px; color: #4b5563;">Technical Complexity</td><td style="padding: 8px 0; text-align: right; font-weight: 700; color: #111827;">${scores.technical}/10</td></tr>
+          <tr style="border-bottom: 1px solid #e5e7eb;"><td style="padding: 8px 0; font-size: 14px; color: #4b5563;">Impact</td><td style="padding: 8px 0; text-align: right; font-weight: 700; color: #111827;">${scores.impact}/10</td></tr>
+          <tr style="border-bottom: 1px solid #e5e7eb;"><td style="padding: 8px 0; font-size: 14px; color: #4b5563;">Presentation</td><td style="padding: 8px 0; text-align: right; font-weight: 700; color: #111827;">${scores.presentation}/10</td></tr>
+          <tr style="border-bottom: 1px solid #e5e7eb;"><td style="padding: 8px 0; font-size: 14px; color: #4b5563;">Feasibility</td><td style="padding: 8px 0; text-align: right; font-weight: 700; color: #111827;">${scores.feasibility}/10</td></tr>
+        </table>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <h4 style="font-size: 14px; text-transform: uppercase; color: #10b981; margin-bottom: 4px;">Key Strengths</h4>
+        <p style="font-size: 14px; line-height: 20px; color: #374151; margin: 0;">${strengths}</p>
+      </div>
+
+      <div style="margin-bottom: 24px;">
+        <h4 style="font-size: 14px; text-transform: uppercase; color: #ef4444; margin-bottom: 4px;">Areas for Improvement</h4>
+        <p style="font-size: 14px; line-height: 20px; color: #374151; margin: 0;">${improvements}</p>
+      </div>
+
+      <div style="height: 1px; background-color: #e5e7eb; margin-top: 24px; margin-bottom: 24px;"></div>
+      <p style="font-size: 12px; line-height: 18px; color: #9ca3af; margin: 0;">HackForge team — Powered by Google Gemini</p>
+    </div>
+  `;
+  await sendEmail(to, `HackForge AI Evaluation Report — ${projectTitle}`, html);
+};
+
+module.exports = { sendOtpEmail, sendWelcomeEmail, sendResultEmail, sendAiEvaluationEmail };

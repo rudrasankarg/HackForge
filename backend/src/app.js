@@ -27,6 +27,8 @@ const feedbackRoutes = require('./routes/feedback');
 const appealRoutes = require('./routes/appeals');
 const organizerRoutes = require('./routes/organizers');
 const ticketRoutes = require('./routes/tickets');
+const aiEvaluationRoutes = require('./routes/aiEvaluations');
+
 
 const app = express();
 app.set('trust proxy', 1);
@@ -69,6 +71,8 @@ app.use('/api/feedback', feedbackRoutes);
 app.use('/api/appeals', appealRoutes);
 app.use('/api/organizers', organizerRoutes);
 app.use('/api/tickets', ticketRoutes);
+app.use('/api/ai-evaluation', aiEvaluationRoutes);
+
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', version: '2.0.0', timestamp: new Date() }));
 

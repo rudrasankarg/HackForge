@@ -24,6 +24,24 @@ const getProjects = async (req, res) => {
       return res.json(projects);
     }
 
+    if (role === 'organizer') {
+      const myHackathons = await Hackathon.find({ createdBy: req.user._id }).select('_id');
+      const hackathonIds = myHackathons.map(h => h._id);
+      if (hackathonId) {
+        if (!hackathonIds.map(id => id.toString()).includes(hackathonId.toString())) {
+          return res.status(403).json({ message: 'Access denied: You do not own this hackathon.' });
+        }
+        filter.hackathonId = hackathonId;
+      } else {
+        filter.hackathonId = { $in: hackathonIds };
+      }
+      const projects = await Project.find(filter)
+        .populate('teamMembers', 'name email')
+        .populate('submittedBy', 'name email')
+        .sort({ rank: 1, finalScore: -1 });
+      return res.json(projects);
+    }
+
     if (role === 'reviewer') {
       const assignments = await Assignment.find({ reviewerId: req.user._id }).select('projectId');
       const ids = assignments.map((a) => a.projectId);
@@ -32,6 +50,7 @@ const getProjects = async (req, res) => {
         .sort({ title: 1 });
       return res.json(projects);
     }
+
 
     // Participant:
     // If results are published for the active hackathon, return all published projects
