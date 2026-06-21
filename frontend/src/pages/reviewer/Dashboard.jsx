@@ -73,7 +73,7 @@ export default function ReviewerDashboard() {
                       )}
                     </>
                   ) : (
-                    <Link to={`/reviewer/evaluate/${a.project?._id}`} className="btn btn-primary btn-sm">
+                    <Link to={`/reviewers/evaluate/${a.project?._id}`} className="btn btn-primary btn-sm">
                       <ExternalLink size={13} /> Evaluate
                     </Link>
                   )}
