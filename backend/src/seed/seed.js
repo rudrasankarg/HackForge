@@ -12,6 +12,9 @@ const Announcement = require('../models/Announcement');
 const ChatMessage = require('../models/ChatMessage');
 const BiasAlert = require('../models/BiasAlert');
 const RegistrationLog = require('../models/RegistrationLog');
+const AiJuryDebate = require('../models/AiJuryDebate');
+const CheatShieldLog = require('../models/CheatShieldLog');
+const AiVideoSentiment = require('../models/AiVideoSentiment');
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/hackforge';
 
@@ -39,6 +42,7 @@ async function seed(skipConnect = false) {
     User.deleteMany(), Hackathon.deleteMany(), Project.deleteMany(), Team.deleteMany(),
     Evaluation.deleteMany(), Assignment.deleteMany(), Announcement.deleteMany(),
     ChatMessage.deleteMany(), BiasAlert.deleteMany(), RegistrationLog.deleteMany(),
+    AiJuryDebate.deleteMany(), CheatShieldLog.deleteMany(), AiVideoSentiment.deleteMany(),
   ]);
 
   try {
@@ -164,7 +168,13 @@ async function seed(skipConnect = false) {
   ];
 
   const projects = await Project.insertMany(
-    projectsData.map((p) => ({ ...p, hackathonId: hackathon._id, status: 'evaluated', submittedAt: new Date('2025-07-11T18:00:00Z') }))
+    projectsData.map((p, idx) => ({ 
+      ...p, 
+      hackathonId: hackathon._id, 
+      status: 'evaluated', 
+      submittedAt: new Date('2025-07-11T18:00:00Z'),
+      videoUrl: idx % 2 === 0 ? 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' : 'https://www.youtube.com/watch?v=XH5OW46yFdw'
+    }))
   );
 
   const teamsToInsert = projects.map((proj, idx) => {
@@ -354,6 +364,82 @@ async function seed(skipConnect = false) {
       { finalScore: ranking.finalScore, rank: ranking.rank, feedback: ranking.feedback }
     );
   }
+
+  // Seed Cheat Shield Logs
+  const cheatLogs = [];
+  const videoSentiments = [];
+  const juryDebates = [];
+
+  for (let i = 0; i < projects.length; i++) {
+    const proj = projects[i];
+
+    // Seed Cheat Shield Logs
+    let plag = 5 + (i * 7) % 65; // 5 to 70
+    let match = 10 + (i * 9) % 75; // 10 to 85
+    let level = 'low';
+    if (plag > 50 || match > 60) level = 'high';
+    else if (plag > 25 || match > 35) level = 'medium';
+
+    cheatLogs.push({
+      projectId: proj._id,
+      hackathonId: hackathon._id,
+      plagiarismScore: plag,
+      boilerplateMatchScore: match,
+      matchDetails: plag > 45 
+        ? `High code block similarity (over 45%) matched with GitHub repository 'react-starter-kit-2024'. Review recommended.`
+        : `Starter templates and boilerplate code matching standard configurations. Standard compliance level.`,
+      flagged: level === 'high',
+      riskLevel: level
+    });
+
+    // Seed Video Sentiment Analysis
+    if (proj.videoUrl) {
+      videoSentiments.push({
+        projectId: proj._id,
+        videoUrl: proj.videoUrl,
+        deliveryScore: 6 + (i * 2) % 5, // 6 to 10
+        confidenceScore: 5 + (i * 3) % 6, // 5 to 10
+        pacing: (i % 3 === 0) ? 'slow' : (i % 3 === 1 ? 'balanced' : 'fast'),
+        valuePropSummary: `Excellent articulation of the core problem solving '${proj.domain}'. The pitch clearly details the implementation of ${proj.techStack.join(', ')} and targets direct real-world users.`,
+        presentationTips: [
+          'Maintain better eye contact with the camera rather than looking down at slides.',
+          'Slow down slightly during the technical architectural walkthrough.',
+          'Clearly specify the competitive advantages and target market viability.'
+        ]
+      });
+    }
+
+    // Seed AI Jury Debate transcripts for unstable projects (e.g. MediScan AI and BlockVote)
+    if (proj.title === 'MediScan AI' || proj.title === 'BlockVote' || proj.title === 'EduPath') {
+      juryDebates.push({
+        projectId: proj._id,
+        hackathonId: hackathon._id,
+        transcript: [
+          {
+            judge: "Dev Dynamo",
+            role: "Technical Architect",
+            message: `Analyzing the stack chosen for "${proj.title}", the integrations look functionally complete. However, they've implemented a straightforward architecture without substantial backend caching. I'd rate their engineering depth a solid B+.`
+          },
+          {
+            judge: "Pixel Perfect",
+            role: "UX/UI Lead",
+            message: "I actually appreciate their attention to accessibility. The typography hierarchy is clean, and the dashboard layout is very intuitive. They could improve the micro-interactions, but from a usability perspective, it's highly polished."
+          },
+          {
+            judge: "Venture Vision",
+            role: "Business Calibrator",
+            message: `From a market standpoint, the value proposition is clear. The feasibility of launching this prototype is high because of low initial infrastructure costs. I agree with Dev Dynamo's note on scaling, but the prototype is highly viable.`
+          }
+        ],
+        consensusScore: 38 + (i % 8), // 38 to 45
+        verdictSummary: `The jury agrees that "${proj.title}" represents a well-designed, viable solution with solid UX decisions, though it requires further backend optimizations to scale efficiently.`
+      });
+    }
+  }
+
+  await CheatShieldLog.insertMany(cheatLogs);
+  await AiVideoSentiment.insertMany(videoSentiments);
+  await AiJuryDebate.insertMany(juryDebates);
 
   console.log('\nSeed complete!');
   console.log('Admin credentials (password: Admin@123):');
