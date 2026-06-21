@@ -167,15 +167,14 @@ export default function AdminDashboard() {
 
   const judges = reviewerPerf?.length > 0
     ? reviewerPerf.map((r, i) => {
-        const fallbackName = MOCK_NAMES[i % MOCK_NAMES.length];
-        const name = r.reviewer?.name || fallbackName;
+        const name = r.name || MOCK_NAMES[i % MOCK_NAMES.length];
         return {
           name,
           initials: name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase(),
-          reviews:  `${r.metrics?.totalEvaluations || 0}/15`,
-          avg:      r.metrics?.averageScore ? r.metrics.averageScore.toFixed(1) : (8.0 + (i % 3) * 0.4).toFixed(1),
-          cons:     '90%',
-          status:   r.metrics?.biasDetected ? 'Warning' : 'Healthy',
+          reviews:  `${r.completedCount || 0}/${r.assignedCount || 15}`,
+          avg:      r.avgScore != null ? r.avgScore.toFixed(1) : (8.0 + (i % 3) * 0.4).toFixed(1),
+          cons:     r.consistency != null ? `${r.consistency}%` : '90%',
+          status:   r.flagged ? 'Warning' : 'Healthy',
         };
       })
     : MOCK_JUDGES;

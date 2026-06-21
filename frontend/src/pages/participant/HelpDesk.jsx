@@ -37,10 +37,12 @@ const inputStyle = { width:'100%', background:'#f8fafc', border:'1px solid rgba(
 export default function HelpDesk() {
   const { user } = useAuth();
   const [tickets, setTickets]               = useState([]);
+  const [hackathons, setHackathons]         = useState([]);
+  const [selectedHackathonId, setSelectedHackathonId] = useState('');
   const [loading, setLoading]               = useState(true);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [showCreate, setShowCreate]         = useState(false);
-  const [form, setForm]                     = useState({ subject:'', category:'technical', description:'' });
+  const [form, setForm]                     = useState({ subject:'', category:'technical', description:'', hackathonId:'' });
   const [replyText, setReplyText]           = useState('');
   const [error, setError]                   = useState('');
   const [submitting, setSubmitting]         = useState(false);
@@ -60,10 +62,32 @@ export default function HelpDesk() {
     }
   };
 
-  useEffect(() => { fetchTickets(); }, []);
+  useEffect(() => {
+    // Fetch hackathons to populate filters and dropdowns
+    api.get('/hackathons')
+      .then(res => {
+        setHackathons(res);
+      })
+      .catch(() => {});
+    fetchTickets();
+  }, []);
+
   useEffect(() => { repliesEndRef.current?.scrollIntoView({ behavior:'smooth' }); }, [selectedTicket?.replies]);
 
-  const fetchTickets = async () => { setLoading(true); try { setTickets(await api.get('/tickets')); } catch {} finally { setLoading(false); } };
+  const fetchTickets = async (hackathonId = '') => {
+    setLoading(true);
+    try {
+      const url = hackathonId ? `/tickets?hackathonId=${hackathonId}` : '/tickets';
+      setTickets(await api.get(url));
+    } catch {}
+    finally { setLoading(false); }
+  };
+
+  const handleHackathonFilterChange = (e) => {
+    const id = e.target.value;
+    setSelectedHackathonId(id);
+    fetchTickets(id);
+  };
 
   const handleSelectTicket = async id => {
     try { setSelectedTicket(await api.get(`/tickets/${id}`)); setShowCreate(false); } catch { setError('Could not open ticket.'); }
@@ -72,10 +96,12 @@ export default function HelpDesk() {
   const handleCreateSubmit = async e => {
     e.preventDefault();
     if (!form.subject || !form.description) { setError('All fields are required.'); return; }
+    if (!form.hackathonId) { setError('Please select a scope.'); return; }
     setSubmitting(true); setError('');
     try {
       const t = await api.post('/tickets', form);
-      setTickets(p => [t,...p]); setForm({ subject:'', category:'technical', description:'' });
+      setTickets(p => [t,...p]);
+      setForm({ subject:'', category:'technical', description:'', hackathonId: '' });
       setSelectedTicket(t); setShowCreate(false);
     } catch (err) { setError(err.message || 'Failed to submit.'); }
     finally { setSubmitting(false); }
@@ -117,8 +143,15 @@ export default function HelpDesk() {
         <div style={{ display:'flex', flex:1, overflow:'hidden' }}>
           {/* LEFT list */}
           <div style={{ width:280, flexShrink:0, borderRight:`1px solid ${C.border}`, display:'flex', flexDirection:'column', background:C.surface, overflowY:'auto' }}>
-            <div style={{ padding:'12px 14px', borderBottom:`1px solid rgba(15,23,42,0.06)` }}>
+            <div style={{ padding:'12px 14px', borderBottom:`1px solid rgba(15,23,42,0.06)`, display:'flex', flexDirection:'column', gap:8 }}>
               <span style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.1em', color:C.muted }}>Tickets ({tickets.length})</span>
+              <select value={selectedHackathonId} onChange={handleHackathonFilterChange} style={{ width:'100%', height:32, borderRadius:6, border:`1px solid ${C.border}`, background:C.bg, fontSize:12, color:C.text, outline:'none', padding:'0 8px' }}>
+                <option value="">All Scopes</option>
+                {['admin', 'participant'].includes(user?.role) && (
+                  <option value="website">Website / Platform</option>
+                )}
+                {hackathons.map(h => <option key={h._id} value={h._id}>{h.name}</option>)}
+              </select>
             </div>
             {loading ? <div style={{ padding:40, display:'flex', justifyContent:'center' }}><div className="spinner" /></div>
               : tickets.length === 0 ? <div style={{ padding:'32px 20px', textAlign:'center', color:C.muted, fontSize:13 }}>No tickets yet.<br/><span style={{ fontSize:12 }}>Click "New Ticket" above.</span></div>
@@ -135,7 +168,12 @@ export default function HelpDesk() {
                           <span style={{ fontSize:10, color:C.muted }}>{new Date(t.createdAt).toLocaleDateString()}</span>
                         </div>
                         <div style={{ fontSize:13, fontWeight:600, color:C.text, overflow:'hidden', whiteSpace:'nowrap', textOverflow:'ellipsis', marginBottom:3 }}>{t.subject}</div>
-                        <div style={{ fontSize:11.5, color:C.muted, display:'flex', alignItems:'center', gap:4 }}><Tag size={10} />{getCatLabel(t.category)}</div>
+                        <div style={{ fontSize:11, color:C.muted, display:'flex', alignItems:'center', gap:4, justifyContent:'space-between' }}>
+                          <span style={{ display:'flex', alignItems:'center', gap:4 }}><Tag size={10} />{getCatLabel(t.category)}</span>
+                          <span style={{ fontSize:10.5, color:C.brand, fontWeight:600, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:120 }} title={t.hackathonId ? t.hackathonId.name : "Website / Platform"}>
+                            {t.hackathonId ? t.hackathonId.name : "Website / Platform"}
+                          </span>
+                        </div>
                       </div>
                     );
                   })}
@@ -152,6 +190,14 @@ export default function HelpDesk() {
                   <p style={{ fontSize:13.5, color:C.sub, marginBottom:28 }}>Mentors and organizers will respond shortly.</p>
                   {error && <div style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 14px', borderRadius:9, background:'rgba(239,68,68,0.07)', border:'1px solid rgba(239,68,68,0.18)', color:'#dc2626', fontSize:13, marginBottom:16 }}><AlertCircle size={14}/>{error}</div>}
                   <form onSubmit={handleCreateSubmit} style={{ display:'flex', flexDirection:'column', gap:18 }}>
+                    <div>
+                      <label style={{ display:'block', fontSize:11, fontWeight:700, color:C.muted, textTransform:'uppercase', letterSpacing:'0.07em', marginBottom:7 }}>Scope</label>
+                      <select value={form.hackathonId} onChange={e=>setForm(p=>({...p,hackathonId:e.target.value}))} style={{ ...inputStyle }} required>
+                        <option value="">Select Scope</option>
+                        <option value="website">Website / Platform (Admin Only)</option>
+                        {hackathons.map(h => <option key={h._id} value={h._id}>{h.name}</option>)}
+                      </select>
+                    </div>
                     {[
                       { label:'Subject', type:'input', key:'subject', placeholder:'Brief title of the issue' },
                     ].map(f => (
@@ -185,7 +231,7 @@ export default function HelpDesk() {
                       <span style={{ fontFamily:'Sora,sans-serif', fontWeight:700, fontSize:15, color:C.text }}>{selectedTicket.subject}</span>
                       <StatusPill status={selectedTicket.status} />
                     </div>
-                    <span style={{ fontSize:12, color:C.muted }}>{getCatLabel(selectedTicket.category)} · {new Date(selectedTicket.createdAt).toLocaleDateString()}</span>
+                    <span style={{ fontSize:12, color:C.muted }}>{getCatLabel(selectedTicket.category)} · {new Date(selectedTicket.createdAt).toLocaleDateString()}{` · Scope: ${selectedTicket.hackathonId ? selectedTicket.hackathonId.name : "Website / Platform"}`}</span>
                   </div>
                   {['admin', 'organizer', 'reviewer'].includes(user?.role) && selectedTicket.status !== 'resolved' && (
                     <button onClick={handleResolveTicket} disabled={submitting}
@@ -206,13 +252,13 @@ export default function HelpDesk() {
                     <span style={{ fontSize:11, color:C.muted, display:'block', marginTop:8 }}>{new Date(selectedTicket.createdAt).toLocaleString()}</span>
                   </div>
                   {selectedTicket.replies?.map((r, i) => {
-                    const isStaff = r.senderRole === 'admin';
+                    const isStaff = r.senderRole === 'admin' || r.senderRole === 'organizer' || r.senderRole === 'reviewer';
                     return (
                       <div key={r._id||i} style={{ padding:'16px 20px', borderRadius:12, background: isStaff ? 'rgba(99,102,241,0.04)' : C.surface, border:`1px solid ${isStaff ? 'rgba(99,102,241,0.18)' : C.border}`, maxWidth:680, alignSelf: isStaff ? 'flex-end' : 'flex-start' }}>
                         <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:10 }}>
                           <div style={{ width:28, height:28, borderRadius:'50%', background: isStaff ? C.brand : '#f1f5f9', color: isStaff ? '#fff' : C.sub, display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700 }}>{r.senderName?.charAt(0).toUpperCase()||'?'}</div>
                           <span style={{ fontSize:13, fontWeight:600, color:C.text }}>{r.senderName}</span>
-                          {isStaff && <span style={{ padding:'2px 6px', borderRadius:4, background:'rgba(99,102,241,0.1)', color:C.brand, fontSize:9, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.08em' }}>Staff</span>}
+                          {isStaff && <span style={{ padding:'2px 6px', borderRadius:4, background:'rgba(99,102,241,0.1)', color:C.brand, fontSize:9, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.08em' }}>{r.senderRole}</span>}
                         </div>
                         <p style={{ fontSize:13.5, color:C.sub, lineHeight:1.7, whiteSpace:'pre-wrap' }}>{r.body}</p>
                         <span style={{ fontSize:11, color:C.muted, display:'block', marginTop:8 }}>{new Date(r.createdAt).toLocaleString()}</span>
