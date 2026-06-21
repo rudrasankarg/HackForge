@@ -1,6 +1,7 @@
-const Project = require('../models/Project');
-const Evaluation = require('../models/Evaluation');
-const User = require('../models/User');
+const Project = require('../../models/Project');
+const Evaluation = require('../../models/Evaluation');
+const User = require('../../models/User');
+
 const { callGemini } = require('../gemini');
 const { mean, stddev, zScore, detectReviewerOutlier } = require('./biasDetector');
 
