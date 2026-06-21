@@ -74,7 +74,7 @@ export default function Evaluate() {
       });
       setSuccess(true);
       toast.success("Evaluation submitted successfully!");
-      setTimeout(() => navigate('/reviewer'), 1500);
+      setTimeout(() => navigate('/reviewers'), 1500);
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -126,7 +126,7 @@ export default function Evaluate() {
         )}
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start' }}>
-          <div className="card">
+          <div className="card" style={{ userSelect: 'none', cursor: 'default' }}>
             <h2 style={{ fontSize: 17, fontWeight: 700, marginBottom: 20 }}>Evaluation Rubric</h2>
             <form onSubmit={handleSubmit}>
               {CRITERIA.map((c) => (
