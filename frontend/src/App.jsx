@@ -98,6 +98,7 @@ function AppRoutes() {
         <Route path="/admin/organizers" element={<ProtectedRoute roles={['admin']}><AdminOrganizers /></ProtectedRoute>} />
         <Route path="/admin/profile" element={<ProtectedRoute roles={['admin']}><ParticipantProfile /></ProtectedRoute>} />
         <Route path="/admin/tickets" element={<ProtectedRoute roles={['admin']}><ParticipantHelpDesk /></ProtectedRoute>} />
+        <Route path="/admin/chat" element={<ProtectedRoute roles={['admin']}><ParticipantChat /></ProtectedRoute>} />
 
         {/* Organizer Routes */}
         <Route path="/organizer" element={<ProtectedRoute roles={['organizer']}><AdminDashboard /></ProtectedRoute>} />
@@ -116,6 +117,7 @@ function AppRoutes() {
         <Route path="/organizer/audit-trail" element={<ProtectedRoute roles={['organizer']}><AdminAuditTrail /></ProtectedRoute>} />
         <Route path="/organizer/profile" element={<ProtectedRoute roles={['organizer']}><ParticipantProfile /></ProtectedRoute>} />
         <Route path="/organizer/tickets" element={<ProtectedRoute roles={['organizer']}><ParticipantHelpDesk /></ProtectedRoute>} />
+        <Route path="/organizer/chat" element={<ProtectedRoute roles={['organizer']}><ParticipantChat /></ProtectedRoute>} />
 
         {/* Reviewer Routes */}
         <Route path="/reviewers" element={<ProtectedRoute roles={['reviewer']}><ReviewerDashboard /></ProtectedRoute>} />

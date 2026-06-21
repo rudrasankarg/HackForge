@@ -17,6 +17,7 @@ const NAV_GROUPS = [
     defaultOpen: true,
     items: [
       { label: 'Dashboard', to: '/admin', icon: LayoutDashboard, end: true },
+      { label: 'Chat',      to: '/admin/chat',      icon: UsersRound },
       { label: 'Results',      to: '/admin/results',      icon: Trophy },
     ],
   },
