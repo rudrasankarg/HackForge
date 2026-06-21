@@ -148,12 +148,27 @@ export default function FairnessCourt() {
                     style={{ fontSize: 14.5, lineHeight: 1.6, color: 'var(--text-primary)' }}
                   >
                     {verdictData.verdict?.split('\n').map((line, idx) => {
-                      if (line.startsWith('#')) {
-                        return <h4 key={idx} style={{ color: 'var(--text-primary)', margin: '14px 0 6px 0', fontSize: 15 }}>{line.replace(/#/g, '')}</h4>;
+                      const cleanLine = line.replace(/^\s*[-*+]\s+/, '• '); // convert markdown lists to bullet points
+                      const replaceBold = (text) => {
+                        const parts = text.split(/\*\*([^*]+)\*\*/g);
+                        return parts.map((part, index) => {
+                          return index % 2 === 1 ? <strong key={index}>{part}</strong> : part;
+                        });
+                      };
+
+                      if (cleanLine.startsWith('###')) {
+                        return <h5 key={idx} style={{ color: 'var(--text-primary)', margin: '14px 0 6px 0', fontSize: 14, fontWeight: 700 }}>{replaceBold(cleanLine.replace('###', ''))}</h5>;
                       }
-                      return <p key={idx} style={{ margin: '0 0 8px 0' }}>{line}</p>;
+                      if (cleanLine.startsWith('##')) {
+                        return <h4 key={idx} style={{ color: 'var(--text-primary)', margin: '16px 0 8px 0', fontSize: 15, fontWeight: 800 }}>{replaceBold(cleanLine.replace('##', ''))}</h4>;
+                      }
+                      if (cleanLine.startsWith('#')) {
+                        return <h3 key={idx} style={{ color: 'var(--text-primary)', margin: '18px 0 10px 0', fontSize: 16, fontWeight: 900 }}>{replaceBold(cleanLine.replace('#', ''))}</h3>;
+                      }
+                      return <p key={idx} style={{ margin: '0 0 8px 0' }}>{replaceBold(cleanLine)}</p>;
                     })}
                   </div>
+
                 </div>
               </div>
             </div>

@@ -311,14 +311,23 @@ export default function AiProjectEvaluation() {
                       >
                         {/* We will output clean line-breaks to keep styling simple */}
                         {currentEval.detailedAnalysis?.split('\n').map((line, idx) => {
-                          if (line.startsWith('###')) {
-                            return <h4 key={idx} style={{ color: 'var(--text-primary)', margin: '14px 0 6px 0', fontSize: 14, fontWeight: 700 }}>{line.replace('###', '')}</h4>;
+                          const cleanLine = line.replace(/^\s*[-*+]\s+/, '• ');
+                          const replaceBold = (text) => {
+                            const parts = text.split(/\*\*([^*]+)\*\*/g);
+                            return parts.map((part, index) => {
+                              return index % 2 === 1 ? <strong key={index}>{part}</strong> : part;
+                            });
+                          };
+
+                          if (cleanLine.startsWith('###')) {
+                            return <h4 key={idx} style={{ color: 'var(--text-primary)', margin: '14px 0 6px 0', fontSize: 14, fontWeight: 700 }}>{replaceBold(cleanLine.replace('###', ''))}</h4>;
                           }
-                          if (line.startsWith('##')) {
-                            return <h3 key={idx} style={{ color: 'var(--text-primary)', margin: '16px 0 8px 0', fontSize: 15, fontWeight: 800 }}>{line.replace('##', '')}</h3>;
+                          if (cleanLine.startsWith('##')) {
+                            return <h3 key={idx} style={{ color: 'var(--text-primary)', margin: '16px 0 8px 0', fontSize: 15, fontWeight: 800 }}>{replaceBold(cleanLine.replace('##', ''))}</h3>;
                           }
-                          return <p key={idx} style={{ margin: '0 0 10px 0' }}>{line}</p>;
+                          return <p key={idx} style={{ margin: '0 0 10px 0' }}>{replaceBold(cleanLine)}</p>;
                         })}
+
                       </div>
                     </div>
                   </div>
