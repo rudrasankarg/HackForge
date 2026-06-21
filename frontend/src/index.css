@@ -50,6 +50,17 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Set default cursors to prevent I-beam on regular text/elements globally */
+* {
+  cursor: default;
+}
+a, button, select, option, label, [role="button"], .btn, .nav-item, input[type="button"], input[type="submit"], input[type="reset"] {
+  cursor: pointer;
+}
+input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]), textarea, [contenteditable="true"], .chip-input {
+  cursor: text;
+}
+
 html { font-size: 15px; }
 
 body {

@@ -103,10 +103,10 @@ export default function Sidebar({ biasAlertCount = 0 }) {
         className="fixed left-0 top-0 h-screen flex flex-col z-50"
         style={{ width: 248, background: 'var(--bg-surface)', borderRight: '1px solid var(--border)' }}
       >
-        <div className="px-5 py-5 flex items-center gap-3" style={{ borderBottom: '1px solid var(--border)' }}>
+        <Link to={prefix} className="px-5 py-5 flex items-center gap-3" style={{ borderBottom: '1px solid var(--border)', cursor: 'pointer', textDecoration: 'none' }}>
           <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs" style={{ background: 'var(--text-primary)', color: 'var(--bg-surface)' }}>HF</div>
           <span className="font-extrabold tracking-tight" style={{ fontSize: 17, color: 'var(--text-primary)' }}>HackForge</span>
-        </div>
+        </Link>
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
           {navItems.map(item => (
             <NavLink key={item.to} to={item.to} end={item.end}
@@ -170,10 +170,10 @@ export default function Sidebar({ biasAlertCount = 0 }) {
       style={{ width: 252, background: 'var(--bg-surface)', borderRight: '1px solid var(--border)' }}
     >
       {/* Brand */}
-      <div className="px-5 py-5 flex items-center gap-3 flex-shrink-0" style={{ borderBottom: '1px solid var(--border)' }}>
+      <Link to={prefix} className="px-5 py-5 flex items-center gap-3 flex-shrink-0" style={{ borderBottom: '1px solid var(--border)', cursor: 'pointer', textDecoration: 'none' }}>
         <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs" style={{ background: 'var(--text-primary)', color: 'var(--bg-surface)' }}>HF</div>
         <span className="font-extrabold tracking-tight" style={{ fontSize: 17, color: 'var(--text-primary)' }}>HackForge</span>
-      </div>
+      </Link>
 
       {/* Accordion Nav */}
       <nav className="flex-1 overflow-y-auto px-4 py-4">
