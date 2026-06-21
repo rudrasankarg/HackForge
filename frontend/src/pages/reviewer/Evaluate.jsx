@@ -130,7 +130,7 @@ export default function Evaluate() {
             <h2 style={{ fontSize: 17, fontWeight: 700, marginBottom: 20 }}>Evaluation Rubric</h2>
             <form onSubmit={handleSubmit}>
               {CRITERIA.map((c) => (
-                <div key={c.key} style={{ background: 'var(--bg-elevated)', padding: 16, borderRadius: 'var(--radius)', marginBottom: 12, userSelect: 'none' }}>
+                <div key={c.key} style={{ background: 'var(--bg-elevated)', padding: 16, borderRadius: 'var(--radius)', marginBottom: 12, userSelect: 'none', cursor: 'default' }}>
                   <div className="flex-between" style={{ marginBottom: 4 }}>
                     <div>
                       <div style={{ fontWeight: 700, fontSize: 14 }}>{c.label}</div>
