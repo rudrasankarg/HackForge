@@ -3,7 +3,7 @@ import { api } from '../../api';
 import Sidebar from '../../components/Sidebar';
 import { toast } from '../../utils/toast';
 import { fmt } from '../../utils/formatters';
-import { Scale, ShieldAlert, Users, TrendingDown, BookOpen, AlertTriangle, Sparkles, Loader2 } from 'lucide-react';
+import { Scale, ShieldAlert, Users, TrendingDown, BookOpen, AlertTriangle, Sparkles, Loader2, X, MessageSquare, Award } from 'lucide-react';
 import SkeletonCard from '../../components/SkeletonCard';
 import EmptyState from '../../components/EmptyState';
 
@@ -13,6 +13,59 @@ export default function FairnessCourt() {
   const [loading, setLoading] = useState(true);
   const [verdictData, setVerdictData] = useState(null);
   const [fetchingVerdict, setFetchingVerdict] = useState(false);
+  const [activeDebate, setActiveDebate] = useState(null);
+  const [loadingDebate, setLoadingDebate] = useState(false);
+  const [showDebateModal, setShowDebateModal] = useState(false);
+
+  const handleConveneDebate = async (projectId, projectTitle) => {
+    setLoadingDebate(true);
+    setShowDebateModal(true);
+    setActiveDebate({ projectTitle });
+    try {
+      let data;
+      try {
+        data = await api.get(`/ai-evaluation/project/${projectId}/jury-debate`);
+      } catch (err) {
+        if (err.status === 404) {
+          // If not found, trigger it
+          data = await api.post(`/ai-evaluation/project/${projectId}/jury-debate`, { projectId });
+        } else {
+          throw err;
+        }
+      }
+      setActiveDebate({
+        projectTitle,
+        projectId,
+        transcript: data.transcript,
+        consensusScore: data.consensusScore,
+        verdictSummary: data.verdictSummary
+      });
+    } catch (err) {
+      toast.error('Failed to run or retrieve Jury Debate.');
+      setShowDebateModal(false);
+    } finally {
+      setLoadingDebate(false);
+    }
+  };
+
+  const handleRegenerateDebate = async (projectId, projectTitle) => {
+    setLoadingDebate(true);
+    try {
+      const data = await api.post(`/ai-evaluation/project/${projectId}/jury-debate`, { projectId });
+      setActiveDebate({
+        projectTitle,
+        projectId,
+        transcript: data.transcript,
+        consensusScore: data.consensusScore,
+        verdictSummary: data.verdictSummary
+      });
+      toast.success('AI Jury Debate re-convened successfully!');
+    } catch (err) {
+      toast.error('Failed to re-convene AI Jury Debate.');
+    } finally {
+      setLoadingDebate(false);
+    }
+  };
 
   useEffect(() => {
     api.get('/hackathons')
@@ -223,7 +276,18 @@ export default function FairnessCourt() {
                           <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand-light)' }}>SD: {i.stdDev}</span>
                         </div>
                         <p style={{ fontSize: 12.5, color: 'var(--text-secondary)', margin: '0 0 6px 0' }}>{i.message}</p>
-                        <div style={{ fontSize: 11, fontFamily: 'monospace', opacity: 0.7 }}>Scores given: [{i.scores}]</div>
+                        <div className="flex-between" style={{ marginTop: 10, flexWrap: 'wrap', gap: 10 }}>
+                          <div style={{ fontSize: 11, fontFamily: 'monospace', opacity: 0.7 }}>Scores given: [{i.scores}]</div>
+                          {i.projectId && (
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', fontSize: 11 }}
+                              onClick={() => handleConveneDebate(i.projectId, i.projectTitle)}
+                            >
+                              <Sparkles size={12} style={{ color: 'var(--brand-light)' }} /> Convene Jury Debate
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))
                   )}
@@ -233,6 +297,127 @@ export default function FairnessCourt() {
           </div>
         )}
       </main>
+
+      {/* AI Jury Debate Modal */}
+      {showDebateModal && activeDebate && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div className="card" style={{ width: '100%', maxWidth: 700, maxHeight: '90vh', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.4)', border: '1px solid var(--border)' }}>
+            
+            {/* Modal Header */}
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-elevated)' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 16, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-primary)' }}>
+                  <Scale size={18} style={{ color: 'var(--brand)' }} /> AI Jury Debate™
+                </h3>
+                <p style={{ margin: '2px 0 0 0', fontSize: 12, color: 'var(--text-secondary)' }}>
+                  Project: <strong style={{ color: 'var(--brand-light)' }}>{activeDebate.projectTitle}</strong>
+                </p>
+              </div>
+              <button
+                onClick={() => setShowDebateModal(false)}
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 4 }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div style={{ padding: 20, overflowY: 'auto', flex: 1, background: 'var(--bg-surface)', display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {loadingDebate ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 20px', gap: 12 }}>
+                  <Loader2 className="animate-spin" size={32} style={{ color: 'var(--brand)' }} />
+                  <p style={{ margin: 0, fontSize: 13.5, color: 'var(--text-secondary)' }}>Simulating virtual jury debate...</p>
+                </div>
+              ) : activeDebate.transcript ? (
+                <>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    {activeDebate.transcript.map((t, idx) => {
+                      // Color coding for each judge role
+                      let color = 'var(--brand)';
+                      let bg = 'var(--brand-dim)';
+                      if (t.role?.toLowerCase().includes('ux') || t.judge?.includes('Pixel')) {
+                        color = '#ec4899';
+                        bg = 'rgba(236,72,153,0.1)';
+                      } else if (t.role?.toLowerCase().includes('business') || t.role?.toLowerCase().includes('calibrator') || t.judge?.includes('Venture')) {
+                        color = '#eab308';
+                        bg = 'rgba(234,179,8,0.1)';
+                      }
+
+                      return (
+                        <div key={idx} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                          <div style={{
+                            width: 36,
+                            height: 36,
+                            borderRadius: '50%',
+                            background: bg,
+                            color: color,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                            fontWeight: 700,
+                            fontSize: 14,
+                            border: `1px solid ${color}40`
+                          }}>
+                            {t.judge?.charAt(0) || 'J'}
+                          </div>
+                          <div style={{ flex: 1, background: 'var(--bg-elevated)', border: '1px solid var(--border)', padding: 12, borderRadius: 8 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+                              <strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>{t.judge}</strong>
+                              <span style={{ fontSize: 11, color: color, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t.role}</span>
+                            </div>
+                            <p style={{ margin: 0, fontSize: 13, lineHeight: 1.5, color: 'var(--text-secondary)' }}>{t.message}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '4px 0' }} />
+
+                  {/* Consensus score & summary */}
+                  <div style={{ background: 'linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-elevated) 100%)', border: '1px solid var(--brand-border)', borderRadius: 8, padding: 16, display: 'flex', gap: 16, alignItems: 'center' }}>
+                    <div style={{ textAlign: 'center', padding: '10px 14px', background: 'var(--brand-dim)', borderRadius: 8, border: '1px solid var(--brand-border)', minWidth: 80 }}>
+                      <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--brand-light)' }}>{activeDebate.consensusScore}</div>
+                      <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.05em' }}>Out of 50</div>
+                    </div>
+                    <div>
+                      <h4 style={{ margin: '0 0 4px 0', fontSize: 13.5, display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-primary)' }}>
+                        <Award size={15} style={{ color: 'var(--brand)' }} /> Jury Consensus Verdict
+                      </h4>
+                      <p style={{ margin: 0, fontSize: 12.5, lineHeight: 1.5, color: 'var(--text-secondary)' }}>{activeDebate.verdictSummary}</p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)' }}>
+                  Failed to load debate details.
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-elevated)' }}>
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => setShowDebateModal(false)}
+              >
+                Close Window
+              </button>
+              {!loadingDebate && activeDebate.projectId && (
+                <button
+                  className="btn btn-primary btn-sm"
+                  style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+                  onClick={() => handleRegenerateDebate(activeDebate.projectId, activeDebate.projectTitle)}
+                >
+                  <Sparkles size={13} /> Re-convene Debate
+                </button>
+              )}
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }

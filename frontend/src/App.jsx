@@ -31,6 +31,7 @@ import AdminAuditTrail from './pages/admin/AuditTrail';
 import AdminOrganizers from './pages/admin/Organizers';
 import AiProjectEvaluation from './pages/admin/AiProjectEvaluation';
 import FairnessCourt from './pages/admin/FairnessCourt';
+import CheatShield from './pages/admin/CheatShield';
 
 
 import ReviewerDashboard from './pages/reviewer/Dashboard';
@@ -94,6 +95,7 @@ function AppRoutes() {
         <Route path="/admin/evaluation" element={<ProtectedRoute roles={['admin']}><AdminEvaluation /></ProtectedRoute>} />
         <Route path="/admin/ai-project-evaluation" element={<ProtectedRoute roles={['admin']}><AiProjectEvaluation /></ProtectedRoute>} />
         <Route path="/admin/fairness-court" element={<ProtectedRoute roles={['admin']}><FairnessCourt /></ProtectedRoute>} />
+        <Route path="/admin/cheat-shield" element={<ProtectedRoute roles={['admin']}><CheatShield /></ProtectedRoute>} />
         <Route path="/admin/results" element={<ProtectedRoute roles={['admin']}><AdminResults /></ProtectedRoute>} />
 
         <Route path="/admin/announcements" element={<ProtectedRoute roles={['admin']}><AdminAnnouncements /></ProtectedRoute>} />
@@ -117,6 +119,7 @@ function AppRoutes() {
         <Route path="/organizer/evaluation" element={<ProtectedRoute roles={['organizer']}><AdminEvaluation /></ProtectedRoute>} />
         <Route path="/organizer/ai-project-evaluation" element={<ProtectedRoute roles={['organizer']}><AiProjectEvaluation /></ProtectedRoute>} />
         <Route path="/organizer/fairness-court" element={<ProtectedRoute roles={['organizer']}><FairnessCourt /></ProtectedRoute>} />
+        <Route path="/organizer/cheat-shield" element={<ProtectedRoute roles={['organizer']}><CheatShield /></ProtectedRoute>} />
         <Route path="/organizer/results" element={<ProtectedRoute roles={['organizer']}><AdminResults /></ProtectedRoute>} />
 
         <Route path="/organizer/announcements" element={<ProtectedRoute roles={['organizer']}><AdminAnnouncements /></ProtectedRoute>} />

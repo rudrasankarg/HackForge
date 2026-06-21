@@ -123,6 +123,7 @@ const getFairnessCourtVerdict = async (hackathonId) => {
         if (sd > 8) { // high disagreement among reviewers
           const proj = projects.find(p => p._id.toString() === pid);
           instability.push({
+            projectId: pid,
             projectTitle: proj?.title || 'Unknown Project',
             scores: scores.join(', '),
             stdDev: parseFloat(sd.toFixed(2)),

@@ -18,6 +18,38 @@ export default function AiProjectEvaluation() {
   const [sendingEmail, setSendingEmail] = useState(null);
   const [filter, setFilter] = useState('all'); // all, pending, completed
 
+  const [videoSentiment, setVideoSentiment] = useState(null);
+  const [loadingVideoSentiment, setLoadingVideoSentiment] = useState(false);
+  const [runningVideoSentiment, setRunningVideoSentiment] = useState(false);
+
+  useEffect(() => {
+    if (selectedProject) {
+      setVideoSentiment(null);
+      setLoadingVideoSentiment(true);
+      api.get(`/ai-evaluation/project/${selectedProject._id}/video-sentiment`)
+        .then(res => setVideoSentiment(res))
+        .catch(() => {
+          // ignore 404
+          setVideoSentiment(null);
+        })
+        .finally(() => setLoadingVideoSentiment(false));
+    }
+  }, [selectedProject]);
+
+  const handleRunVideoSentiment = async () => {
+    if (!selectedProject) return;
+    setRunningVideoSentiment(true);
+    try {
+      const res = await api.post('/ai-evaluation/project/video-sentiment', { projectId: selectedProject._id });
+      setVideoSentiment(res);
+      toast.success('Pitch Video Sentiment Analysis generated successfully!');
+    } catch (err) {
+      toast.error(err.message || 'Video analysis failed.');
+    } finally {
+      setRunningVideoSentiment(false);
+    }
+  };
+
   const fetchProjectsAndEvaluations = async () => {
     setLoading(true);
     try {
@@ -329,6 +361,93 @@ export default function AiProjectEvaluation() {
                         })}
 
                       </div>
+                    </div>
+
+                    {/* Video Sentiment Widget */}
+                    <div style={{ marginTop: 24, padding: '16px', background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 8 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                          Pitch Video Sentiment & Pitch Analyzer
+                        </div>
+                        {selectedProject.videoUrl && (
+                          <a href={selectedProject.videoUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: 'var(--brand-light)', textDecoration: 'underline' }}>
+                            Watch Video
+                          </a>
+                        )}
+                      </div>
+
+                      {!selectedProject.videoUrl ? (
+                        <div style={{ fontSize: 12.5, color: 'var(--text-muted)', textAlign: 'center', padding: '10px 0' }}>
+                          No pitch video URL registered for this project.
+                        </div>
+                      ) : loadingVideoSentiment ? (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '15px 0', gap: 8 }}>
+                          <Loader2 size={16} style={{ animation: 'spin 1s linear infinite', color: 'var(--brand)' }} />
+                          <span style={{ fontSize: 12.5, color: 'var(--text-secondary)' }}>Retrieving video analytics...</span>
+                        </div>
+                      ) : !videoSentiment ? (
+                        <div style={{ textAlign: 'center', padding: '15px 0' }}>
+                          <p style={{ fontSize: 12.5, color: 'var(--text-secondary)', margin: '0 0 10px 0' }}>
+                            No pitch analytics generated for this video yet.
+                          </p>
+                          <button
+                            className="btn btn-primary btn-sm"
+                            disabled={runningVideoSentiment}
+                            onClick={handleRunVideoSentiment}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                          >
+                            {runningVideoSentiment ? (
+                              <>
+                                <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> Analyzing Pitch...
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles size={12} /> Analyze Video Pitch
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                          {/* Score metrics */}
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 6, padding: '8px 6px', textAlign: 'center' }}>
+                              <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--brand-light)' }}>{videoSentiment.deliveryScore}/10</div>
+                              <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', marginTop: 2 }}>Delivery</div>
+                            </div>
+                            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 6, padding: '8px 6px', textAlign: 'center' }}>
+                              <div style={{ fontSize: 16, fontWeight: 800, color: '#10b981' }}>{videoSentiment.confidenceScore}/10</div>
+                              <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', marginTop: 2 }}>Confidence</div>
+                            </div>
+                            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 6, padding: '8px 6px', textAlign: 'center' }}>
+                              <div style={{ fontSize: 13, fontWeight: 700, color: '#eab308', height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                {videoSentiment.pacing}
+                              </div>
+                              <div style={{ fontSize: 9, color: 'var(--text-muted)', textTransform: 'uppercase', marginTop: 2 }}>Pacing</div>
+                            </div>
+                          </div>
+
+                          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 6, padding: 10 }}>
+                            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>Value Prop Summary</div>
+                            <p style={{ margin: 0, fontSize: 12, lineHeight: 1.4, color: 'var(--text-secondary)' }}>{videoSentiment.valuePropSummary}</p>
+                          </div>
+
+                          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 6, padding: 10 }}>
+                            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>Presentation Tips</div>
+                            <p style={{ margin: 0, fontSize: 12, lineHeight: 1.4, color: 'var(--text-secondary)' }}>{videoSentiment.presentationTips}</p>
+                          </div>
+
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            style={{ alignSelf: 'flex-end', fontSize: 11, padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                            disabled={runningVideoSentiment}
+                            onClick={handleRunVideoSentiment}
+                          >
+                            {runningVideoSentiment && <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} />}
+                            {runningVideoSentiment ? 'Re-analyzing...' : 'Re-analyze Video'}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

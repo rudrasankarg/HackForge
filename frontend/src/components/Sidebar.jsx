@@ -43,6 +43,7 @@ const NAV_GROUPS = [
       { label: 'AI Evaluation',  to: '/admin/ai-project-evaluation', icon: BrainCircuit },
       { label: 'Fairness Court', to: '/admin/fairness-court',          icon: Scale },
       { label: 'Bias Monitor',   to: '/admin/bias-explained',        icon: ShieldAlert },
+      { label: 'Cheat Shield',   to: '/admin/cheat-shield',          icon: ShieldAlert },
       { label: 'Similarity',     to: '/admin/analytics',             icon: Fingerprint },
     ],
   },
