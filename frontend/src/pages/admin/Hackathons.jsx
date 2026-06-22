@@ -23,6 +23,18 @@ export default function AdminHackathons() {
   const [editing, setEditing] = useState(null);
   const [organizers, setOrganizers] = useState([]);
 
+  const getMinDateTimeString = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+  const minDateTime = getMinDateTimeString();
+
+
   useEffect(() => {
     api.get('/hackathons').then(setHackathons).catch(() => {}).finally(() => setLoading(false));
     if (user?.role === 'admin') {
@@ -119,11 +131,11 @@ export default function AdminHackathons() {
                 </div>
                 <div className="form-group">
                   <label className="form-label">Registration Deadline</label>
-                  <input className="form-input" type="datetime-local" value={form.registrationDeadline} onChange={set('registrationDeadline')} />
+                  <input className="form-input" type="datetime-local" value={form.registrationDeadline} onChange={set('registrationDeadline')} min={minDateTime} />
                 </div>
                 <div className="form-group">
                   <label className="form-label">Submission Deadline</label>
-                  <input className="form-input" type="datetime-local" value={form.submissionDeadline} onChange={set('submissionDeadline')} />
+                  <input className="form-input" type="datetime-local" value={form.submissionDeadline} onChange={set('submissionDeadline')} min={minDateTime} />
                 </div>
                 <div className="form-group">
                   <label className="form-label">Min Team Size</label>
