@@ -36,20 +36,33 @@ router.post('/:hackathonId/finalise', auth, requireRole('admin', 'organizer'), a
       }
     }
 
-    const projects = await Project.find({ hackathonId: req.params.hackathonId });
+    const projects = await Project.find({ hackathonId: req.params.hackathonId }).populate('teamMembers', 'name email');
     const evaluations = await Evaluation.find({ hackathonId: req.params.hackathonId, status: 'completed' });
 
     const results = await processResults(evaluations, projects);
+    const { sendResultEmail } = require('../services/emailService');
 
     // Persist rank and feedback back to projects
     for (const r of results) {
-      await Project.findByIdAndUpdate(r.project._id, {
+      const updatedProj = await Project.findByIdAndUpdate(r.project._id, {
         finalScore: r.finalScore,
         rank: r.rank,
         aiFeedback: r.feedback,
         confidenceScore: r.confidenceScore,
         status: 'evaluated',
-      });
+      }, { new: true }).populate('teamMembers', 'name email');
+
+      if (updatedProj && updatedProj.teamMembers) {
+        for (const member of updatedProj.teamMembers) {
+          sendResultEmail(
+            member.email,
+            member.name,
+            r.rank,
+            r.finalScore,
+            r.feedback || 'Congratulations on completing the hackathon!'
+          ).catch(e => console.error('Failed to send result email:', e.message));
+        }
+      }
     }
 
     res.json({ results, message: 'Results finalised successfully' });

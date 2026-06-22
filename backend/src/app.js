@@ -28,6 +28,8 @@ const appealRoutes = require('./routes/appeals');
 const organizerRoutes = require('./routes/organizers');
 const ticketRoutes = require('./routes/tickets');
 const aiEvaluationRoutes = require('./routes/aiEvaluations');
+const emailRoutes = require('./routes/emails');
+
 
 
 const app = express();
@@ -72,6 +74,8 @@ app.use('/api/appeals', appealRoutes);
 app.use('/api/organizers', organizerRoutes);
 app.use('/api/tickets', ticketRoutes);
 app.use('/api/ai-evaluation', aiEvaluationRoutes);
+app.use('/api/emails', emailRoutes);
+
 
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', version: '2.0.0', timestamp: new Date() }));
@@ -168,6 +172,12 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/hackforge'
 
 mongoose.connect(MONGO_URI).then(() => {
   console.log('MongoDB connected');
+  try {
+    const { startCampaignService } = require('./services/emailCampaignService');
+    startCampaignService();
+  } catch (err) {
+    console.error('Failed to start email campaign service:', err.message);
+  }
   server.listen(process.env.PORT || 5000, () =>
     console.log(`HackForge API running on port ${process.env.PORT || 5000}`)
   );

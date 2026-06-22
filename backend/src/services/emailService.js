@@ -1,4 +1,65 @@
 const nodemailer = require('nodemailer');
+const EmailTelemetry = require('../models/EmailTelemetry');
+
+// 1. Predict optimal send time based on past opens or high-engagement defaults
+const predictOptimalSendTime = async (recipientEmail) => {
+  const now = new Date();
+  try {
+    const pastOpens = await EmailTelemetry.find({
+      recipientEmail,
+      status: { $in: ['opened', 'clicked'] }
+    }).limit(5);
+
+    if (pastOpens.length > 0) {
+      const hours = pastOpens.map(p => (p.openedAt || p.updatedAt).getHours());
+      const avgHour = Math.round(hours.reduce((a, b) => a + b, 0) / hours.length);
+
+      const target = new Date();
+      target.setHours(avgHour, 0, 0, 0);
+      if (target < now) {
+        target.setDate(target.getDate() + 1);
+      }
+      return target;
+    }
+  } catch (err) {
+    console.error('Error predicting optimal send time:', err.message);
+  }
+
+  // Default optimal times: 9 AM or 2 PM
+  const target = new Date();
+  const currentHour = now.getHours();
+  if (currentHour < 9) {
+    target.setHours(9, 0, 0, 0);
+  } else if (currentHour < 14) {
+    target.setHours(14, 0, 0, 0);
+  } else {
+    target.setHours(9, 0, 0, 0);
+    target.setDate(target.getDate() + 1);
+  }
+  return target;
+};
+
+// 2. Helper to wrap links and inject 1px tracking pixel
+const wrapLinksAndInjectPixel = (html, telemetryId) => {
+  const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
+  
+  // Wrap href links (excluding mailto, anchor links, and existing tracking endpoints)
+  let wrappedHtml = html.replace(/href="((https?:\/\/[^"]+))"/gi, (match, url) => {
+    if (url.includes('/api/emails/track')) {
+      return match;
+    }
+    return `href="${backendUrl}/api/emails/track/click/${telemetryId}?url=${encodeURIComponent(url)}"`;
+  });
+
+  // Inject tracking pixel before </body> or at the end
+  const pixelTag = `<img src="${backendUrl}/api/emails/track/open/${telemetryId}" width="1" height="1" style="display:none;" alt="" />`;
+  if (wrappedHtml.includes('</body>')) {
+    wrappedHtml = wrappedHtml.replace('</body>', `${pixelTag}</body>`);
+  } else {
+    wrappedHtml += pixelTag;
+  }
+  return wrappedHtml;
+};
 
 const createTransporter = () => {
   if (process.env.SMTP_USER && process.env.SMTP_PASS) {
@@ -15,7 +76,38 @@ const createTransporter = () => {
   return null;
 };
 
-const sendEmail = async (to, subject, html) => {
+// 3. Send email and record telemetry
+const sendEmail = async (to, subject, html, campaignType = 'announcement') => {
+  let telemetryId = null;
+  let sendTimePrediction = null;
+
+  try {
+    sendTimePrediction = await predictOptimalSendTime(to);
+    const telemetry = await EmailTelemetry.create({
+      recipientEmail: to,
+      subject,
+      campaignType,
+      status: 'sent',
+      sendTimePrediction
+    });
+    telemetryId = telemetry._id;
+  } catch (err) {
+    console.error('Failed to initialize telemetry record:', err.message);
+  }
+
+  // Wrap links and inject tracking pixel if telemetry record was created successfully
+  const processedHtml = telemetryId ? wrapLinksAndInjectPixel(html, telemetryId) : html;
+
+  const markFailed = async () => {
+    if (telemetryId) {
+      try {
+        await EmailTelemetry.findByIdAndUpdate(telemetryId, { status: 'failed' });
+      } catch (err) {
+        console.error('Failed to update telemetry to failed status:', err.message);
+      }
+    }
+  };
+
   // 1. Check if Brevo API Key is present (HTTPS - Not Blocked by Render)
   if (process.env.BREVO_API_KEY) {
     try {
@@ -30,7 +122,7 @@ const sendEmail = async (to, subject, html) => {
           sender: { name: 'HackForge', email: process.env.SMTP_USER || 'noreply@hackforge.dev' },
           to: [{ email: to }],
           subject,
-          htmlContent: html
+          htmlContent: processedHtml
         })
       });
       if (res.ok) {
@@ -38,11 +130,12 @@ const sendEmail = async (to, subject, html) => {
       } else {
         const errData = await res.json().catch(() => ({}));
         console.error(`[EMAIL BREVO ERROR]`, errData);
+        await markFailed();
       }
     } catch (err) {
       console.error(`[EMAIL BREVO ERROR] Failed to send:`, err.message);
+      await markFailed();
     }
-    // Return immediately if API key was present - do not fall back to SMTP which hangs on Render
     return;
   }
 
@@ -59,7 +152,7 @@ const sendEmail = async (to, subject, html) => {
           from: process.env.SMTP_FROM || 'onboarding@resend.dev',
           to: [to],
           subject,
-          html
+          html: processedHtml
         })
       });
       if (res.ok) {
@@ -67,11 +160,12 @@ const sendEmail = async (to, subject, html) => {
       } else {
         const errData = await res.json().catch(() => ({}));
         console.error(`[EMAIL RESEND ERROR]`, errData);
+        await markFailed();
       }
     } catch (err) {
       console.error(`[EMAIL RESEND ERROR] Failed to send:`, err.message);
+      await markFailed();
     }
-    // Return immediately if API key was present - do not fall back to SMTP which hangs on Render
     return;
   }
 
@@ -86,11 +180,12 @@ const sendEmail = async (to, subject, html) => {
       from: process.env.SMTP_FROM || 'HackForge <noreply@hackforge.dev>',
       to,
       subject,
-      html,
+      html: processedHtml,
     });
   } catch (err) {
     console.error(`[EMAIL ERROR] Failed to send email via SMTP:`, err.message);
     console.log(`[EMAIL FALLBACK] To: ${to} | Subject: ${subject}`);
+    await markFailed();
   }
 };
 
@@ -113,7 +208,7 @@ const sendOtpEmail = async (to, code, name) => {
       <p style="font-size: 12px; line-height: 18px; color: #9ca3af; margin: 0;">If you did not request this code, you can safely ignore this email.</p>
     </div>
   `;
-  await sendEmail(to, 'HackForge — Email Verification Code', html);
+  await sendEmail(to, 'HackForge — Email Verification Code', html, 'otp');
 };
 
 const sendWelcomeEmail = async (to, name) => {
@@ -132,7 +227,7 @@ const sendWelcomeEmail = async (to, name) => {
       <p style="font-size: 12px; line-height: 18px; color: #9ca3af; margin: 0;">HackForge team</p>
     </div>
   `;
-  await sendEmail(to, 'Welcome to HackForge', html);
+  await sendEmail(to, 'Welcome to HackForge', html, 'welcome');
 };
 
 const sendResultEmail = async (to, name, rank, score, feedbackText) => {
@@ -155,7 +250,7 @@ const sendResultEmail = async (to, name, rank, score, feedbackText) => {
       <p style="font-size: 12px; line-height: 18px; color: #9ca3af; margin: 0;">HackForge team</p>
     </div>
   `;
-  await sendEmail(to, 'HackForge — Your Hackathon Results', html);
+  await sendEmail(to, 'HackForge — Your Hackathon Results', html, 'result');
 };
 
 const sendAiEvaluationEmail = async (to, teamName, projectTitle, scores, strengths, improvements, detailedAnalysis) => {
@@ -196,7 +291,14 @@ const sendAiEvaluationEmail = async (to, teamName, projectTitle, scores, strengt
       <p style="font-size: 12px; line-height: 18px; color: #9ca3af; margin: 0;">HackForge team — Powered by Google Gemini</p>
     </div>
   `;
-  await sendEmail(to, `HackForge AI Evaluation Report — ${projectTitle}`, html);
+  await sendEmail(to, `HackForge AI Evaluation Report — ${projectTitle}`, html, 'journey_evaluation_complete');
 };
 
-module.exports = { sendOtpEmail, sendWelcomeEmail, sendResultEmail, sendAiEvaluationEmail };
+module.exports = {
+  sendEmail,
+  sendOtpEmail,
+  sendWelcomeEmail,
+  sendResultEmail,
+  sendAiEvaluationEmail,
+  predictOptimalSendTime
+};
