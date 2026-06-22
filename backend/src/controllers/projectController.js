@@ -128,6 +128,10 @@ const submitProject = async (req, res) => {
     const hackathon = await Hackathon.findById(team.hackathonId);
     if (!hackathon) return res.status(404).json({ message: 'Hackathon not found.' });
 
+    if (hackathon.status !== 'active') {
+      return res.status(400).json({ message: 'Submissions are only allowed when the hackathon status is active.' });
+    }
+
     if (hackathon.submissionDeadline && new Date() > hackathon.submissionDeadline)
       return res.status(410).json({ message: 'Submission deadline has passed.' });
 

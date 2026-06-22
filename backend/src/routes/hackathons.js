@@ -29,6 +29,17 @@ router.get('/:id', auth, async (req, res) => {
 // Create hackathon
 router.post('/', auth, requireRole('admin', 'organizer'), async (req, res) => {
   try {
+    const { registrationDeadline, submissionDeadline } = req.body;
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    if (registrationDeadline && new Date(registrationDeadline) < today) {
+      return res.status(400).json({ message: 'Registration deadline cannot be in the past.' });
+    }
+    if (submissionDeadline && new Date(submissionDeadline) < today) {
+      return res.status(400).json({ message: 'Submission deadline cannot be in the past.' });
+    }
+
     const createdBy = (req.user.role === 'admin' && req.body.createdBy) ? req.body.createdBy : req.user._id;
     const hackathon = await Hackathon.create({ ...req.body, createdBy });
     res.status(201).json(hackathon);
@@ -38,6 +49,17 @@ router.post('/', auth, requireRole('admin', 'organizer'), async (req, res) => {
 // Update hackathon
 router.put('/:id', auth, requireRole('admin', 'organizer'), async (req, res) => {
   try {
+    const { registrationDeadline, submissionDeadline } = req.body;
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    if (registrationDeadline && new Date(registrationDeadline) < today) {
+      return res.status(400).json({ message: 'Registration deadline cannot be in the past.' });
+    }
+    if (submissionDeadline && new Date(submissionDeadline) < today) {
+      return res.status(400).json({ message: 'Submission deadline cannot be in the past.' });
+    }
+
     const h = await Hackathon.findById(req.params.id);
     if (!h) return res.status(404).json({ message: 'Hackathon not found.' });
     if (req.user.role === 'organizer' && h.createdBy?.toString() !== req.user._id.toString()) {
