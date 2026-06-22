@@ -1321,3 +1321,31 @@ body.dark-theme .hover\:bg-red-50:hover {
 body.dark-theme .hover\:text-red-600:hover {
   color: #fca5a5 !important;
 }
+
+/* ---- Cursor utilities ---- */
+.no-text-cursor,
+.no-text-cursor * {
+  cursor: default !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+.no-text-cursor input[type="range"],
+.no-text-cursor input[type="range"]::-webkit-slider-thumb,
+.no-text-cursor .score-slider,
+.no-text-cursor .score-slider::-webkit-slider-thumb,
+.no-text-cursor .btn,
+.no-text-cursor .btn *,
+.no-text-cursor a,
+.no-text-cursor a * {
+  cursor: pointer !important;
+}
+
+.no-text-cursor textarea,
+.no-text-cursor input[type="text"],
+.no-text-cursor .form-textarea {
+  cursor: text !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+}
+

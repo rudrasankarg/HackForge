@@ -126,11 +126,11 @@ export default function Evaluate() {
         )}
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start' }}>
-          <div className="card" style={{ userSelect: 'none', cursor: 'default' }}>
+          <div className="card no-text-cursor">
             <h2 style={{ fontSize: 17, fontWeight: 700, marginBottom: 20 }}>Evaluation Rubric</h2>
             <form onSubmit={handleSubmit}>
               {CRITERIA.map((c) => (
-                <div key={c.key} style={{ background: 'var(--bg-elevated)', padding: 16, borderRadius: 'var(--radius)', marginBottom: 12, userSelect: 'none', cursor: 'default' }}>
+                <div key={c.key} style={{ background: 'var(--bg-elevated)', padding: 16, borderRadius: 'var(--radius)', marginBottom: 12 }} className="no-text-cursor">
                   <div className="flex-between" style={{ marginBottom: 4 }}>
                     <div>
                       <div style={{ fontWeight: 700, fontSize: 14 }}>{c.label}</div>

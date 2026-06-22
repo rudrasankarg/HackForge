@@ -161,7 +161,7 @@ export default function AdminBiasExplained() {
 
         {/* Section 3 — How Z-Score Detection Works (visual explainer) */}
         <div className="grid-2" style={{ gap: 24, marginBottom: 36, alignItems: 'start' }}>
-          <div className="card">
+          <div className="card no-text-cursor">
             <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>Interactive Z-Score Simulator</h2>
             <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 20, lineHeight: 1.5 }}>
               Use the slider to drag Reviewer D's score and observe how standard deviation and Z-scores update dynamically. If Reviewer D's Z-Score deviates beyond ±1.5, a statistical anomaly bias alert triggers!
