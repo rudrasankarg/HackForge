@@ -129,6 +129,19 @@ export default function SubmitProject() {
           </div>
         )}
 
+        {(() => {
+          const selectedHackathon = hackathons.find((h) => h._id === selectedHackathonId);
+          if (selectedHackathon && selectedHackathon.status !== 'active') {
+            return (
+              <div className="alert alert-error" style={{ marginBottom: 16, maxWidth: 720 }}>
+                <AlertCircle size={15} />
+                Submissions are only allowed when the hackathon is Active. Currently, this hackathon is: <strong style={{ textTransform: 'capitalize' }}>{selectedHackathon.status}</strong>.
+              </div>
+            );
+          }
+          return null;
+        })()}
+
         {existing && (
           <div style={{ marginBottom: 16 }}>
             <span className={`badge badge-${existing.status === 'evaluated' ? 'success' : existing.status === 'submitted' ? 'primary' : 'muted'}`}>
@@ -199,7 +212,15 @@ export default function SubmitProject() {
                 </div>
               </div>
 
-              <button id="submit-project" type="submit" className="btn btn-primary" disabled={loading}>
+              <button 
+                id="submit-project" 
+                type="submit" 
+                className="btn btn-primary" 
+                disabled={loading || (() => {
+                  const selectedHackathon = hackathons.find((h) => h._id === selectedHackathonId);
+                  return selectedHackathon && selectedHackathon.status !== 'active';
+                })()}
+              >
                 {loading ? <div className="spinner" style={{ width: 16, height: 16 }} /> : <Send size={15} />}
                 {existing ? 'Update Submission' : 'Submit Project'}
               </button>

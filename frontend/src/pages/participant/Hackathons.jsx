@@ -112,7 +112,15 @@ export default function ParticipantHackathons() {
     finally { setSubmitting(false); }
   };
 
-  const formatDate = (start, end) => {
+  const formatDate = (start, end, h) => {
+    if (!start && h && h.submissionDeadline) {
+      const regStart = h.createdAt ? new Date(h.createdAt) : new Date();
+      const subDead = new Date(h.submissionDeadline);
+      const diffTime = Math.abs(subDead - regStart);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      const subDeadStr = subDead.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+      return `${diffDays} days duration (ends ${subDeadStr})`;
+    }
     if (!start) return 'Dates TBA';
     const opts = { month: 'short', day: 'numeric' };
     const s = new Date(start).toLocaleDateString(undefined, opts);
@@ -170,7 +178,7 @@ export default function ParticipantHackathons() {
               display: 'flex', gap: 32, flexWrap: 'wrap',
             }}>
               {[
-                { icon: Clock, label: 'Dates', value: formatDate(selectedEvent.startDate, selectedEvent.endDate) },
+                { icon: Clock, label: 'Dates', value: formatDate(selectedEvent.startDate, selectedEvent.endDate, selectedEvent) },
                 { icon: Users, label: 'Teams Registered', value: projects.length > 0 ? projects.length : '—' },
                 { icon: MapPin, label: 'Mode', value: selectedEvent.mode || 'Online' },
               ].map(({ icon: Icon, label, value }) => (
@@ -483,7 +491,7 @@ export default function ParticipantHackathons() {
                   {/* Date */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 16 }}>
                     <Clock size={12} color={C.muted} strokeWidth={2} />
-                    <span style={{ fontSize: 12, color: C.muted }}>{formatDate(h.startDate, h.endDate)}</span>
+                    <span style={{ fontSize: 12, color: C.muted }}>{formatDate(h.startDate, h.endDate, h)}</span>
                   </div>
 
                   {/* Footer */}
