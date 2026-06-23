@@ -7,7 +7,7 @@ import {
   BrainCircuit, ShieldAlert, Fingerprint,
   Scale, FileText, Settings,
   LogOut, Plus, ChevronDown, ChevronRight, Home,
-  Users, FolderOpen, Mail
+  Users, FolderOpen, Mail, BarChart3
 } from 'lucide-react';
 
 const NAV_GROUPS = [
@@ -45,7 +45,7 @@ const NAV_GROUPS = [
       { label: 'Fairness Court', to: '/admin/fairness-court',          icon: Scale },
       { label: 'Bias Monitor',   to: '/admin/bias-explained',        icon: ShieldAlert },
       { label: 'Cheat Shield',   to: '/admin/cheat-shield',          icon: ShieldAlert },
-      { label: 'Similarity',     to: '/admin/analytics',             icon: Fingerprint },
+      { label: 'Analytics',      to: '/admin/analytics',             icon: BarChart3 },
     ],
   },
 

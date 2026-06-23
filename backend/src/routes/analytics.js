@@ -252,10 +252,12 @@ router.get('/reviewer-performance', auth, requireRole('admin', 'organizer'), asy
         continue; // Only reviewers who have submitted at least one evaluation
       }
 
-      // Find total assignments (assigned evaluations)
-      const assignedCount = await Assignment.countDocuments({ reviewerId: reviewer._id });
-
       const completedCount = completedEvals.length;
+      let assignedCount = await Assignment.countDocuments({ reviewerId: reviewer._id });
+      if (assignedCount < completedCount) {
+        assignedCount = completedCount;
+      }
+
       const completionRate = assignedCount > 0 ? Math.round((completedCount / assignedCount) * 100) : 0;
 
       // Avg score
