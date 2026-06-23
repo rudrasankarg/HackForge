@@ -40,7 +40,7 @@ const runCampaignChecks = async () => {
               <h2 style="font-size: 18px; font-weight: 700; color: #111827; margin: 0 0 12px 0;">Find Your Dream Team!</h2>
               <p style="font-size: 15px; line-height: 24px; color: #374151; margin: 0 0 24px 0;">Hello ${participant.name}, we noticed you haven't joined or created a team yet. Teams with complementary skills have a much higher rate of success! Log in to find teammates or create a new team.</p>
               <div style="margin-bottom: 24px;">
-                <a href="${process.env.CLIENT_ORIGIN || 'http://localhost:3000'}/dashboard" style="display: inline-block; background-color: #111827; color: #ffffff; padding: 12px 24px; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 6px;">Find Teammates</a>
+                <a href="${process.env.CLIENT_ORIGIN || 'https://hackforge-4s9q.onrender.com'}/dashboard" style="display: inline-block; background-color: #111827; color: #ffffff; padding: 12px 24px; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 6px;">Find Teammates</a>
               </div>
               <div style="height: 1px; background-color: #e5e7eb; margin-top: 24px; margin-bottom: 16px;"></div>
               <p style="font-size: 12px; line-height: 18px; color: #9ca3af; margin: 0;">HackForge team</p>
@@ -79,7 +79,7 @@ const runCampaignChecks = async () => {
                 <h2 style="font-size: 18px; font-weight: 700; color: #111827; margin: 0 0 12px 0;">Submit Your Project Checklist</h2>
                 <p style="font-size: 15px; line-height: 24px; color: #374151; margin: 0 0 24px 0;">Hello ${member.name}, your team <strong>${team.name}</strong> has not submitted a project yet. Make sure to complete your codebase, prepare your GitHub URL, record a short demo video, and submit your project before the deadline!</p>
                 <div style="margin-bottom: 24px;">
-                  <a href="${process.env.CLIENT_ORIGIN || 'http://localhost:3000'}/dashboard" style="display: inline-block; background-color: #111827; color: #ffffff; padding: 12px 24px; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 6px;">Submit Project</a>
+                  <a href="${process.env.CLIENT_ORIGIN || 'https://hackforge-4s9q.onrender.com'}/dashboard" style="display: inline-block; background-color: #111827; color: #ffffff; padding: 12px 24px; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 6px;">Submit Project</a>
                 </div>
                 <div style="height: 1px; background-color: #e5e7eb; margin-top: 24px; margin-bottom: 16px;"></div>
                 <p style="font-size: 12px; line-height: 18px; color: #9ca3af; margin: 0;">HackForge team</p>

@@ -41,7 +41,7 @@ const predictOptimalSendTime = async (recipientEmail) => {
 
 // 2. Helper to wrap links and inject 1px tracking pixel
 const wrapLinksAndInjectPixel = (html, telemetryId) => {
-  const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
+  const backendUrl = process.env.BACKEND_URL || 'https://hackforge-4s9q.onrender.com';
   
   // Wrap href links (excluding mailto, anchor links, and existing tracking endpoints)
   let wrappedHtml = html.replace(/href="((https?:\/\/[^"]+))"/gi, (match, url) => {
@@ -221,7 +221,7 @@ const sendWelcomeEmail = async (to, name) => {
       <h2 style="font-size: 18px; font-weight: 700; color: #111827; margin: 0 0 12px 0;">Welcome to HackForge, ${name}!</h2>
       <p style="font-size: 15px; line-height: 24px; color: #374151; margin: 0 0 24px 0;">Your account has been created successfully. You can now log in, join or create a team, and submit projects.</p>
       <div style="margin-bottom: 24px;">
-        <a href="${process.env.CLIENT_ORIGIN || 'http://localhost:3000'}/login" style="display: inline-block; background-color: #111827; color: #ffffff; padding: 12px 24px; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 6px;">Go to Platform</a>
+        <a href="${process.env.CLIENT_ORIGIN || 'https://hackforge-4s9q.onrender.com'}/login" style="display: inline-block; background-color: #111827; color: #ffffff; padding: 12px 24px; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 6px;">Go to Platform</a>
       </div>
       <div style="height: 1px; background-color: #e5e7eb; margin-top: 24px; margin-bottom: 16px;"></div>
       <p style="font-size: 12px; line-height: 18px; color: #9ca3af; margin: 0;">HackForge team</p>
@@ -244,7 +244,7 @@ const sendResultEmail = async (to, name, rank, score, feedbackText) => {
         "${feedbackText}"
       </div>
       <div style="margin-bottom: 24px; margin-top: 24px;">
-        <a href="${process.env.CLIENT_ORIGIN || 'http://localhost:3000'}/login" style="display: inline-block; background-color: #111827; color: #ffffff; padding: 12px 24px; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 6px;">View Leaderboard</a>
+        <a href="${process.env.CLIENT_ORIGIN || 'https://hackforge-4s9q.onrender.com'}/login" style="display: inline-block; background-color: #111827; color: #ffffff; padding: 12px 24px; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 6px;">View Leaderboard</a>
       </div>
       <div style="height: 1px; background-color: #e5e7eb; margin-top: 24px; margin-bottom: 16px;"></div>
       <p style="font-size: 12px; line-height: 18px; color: #9ca3af; margin: 0;">HackForge team</p>
