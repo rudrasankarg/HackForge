@@ -7,7 +7,7 @@ import {
   BrainCircuit, ShieldAlert, Fingerprint,
   Scale, FileText, Settings,
   LogOut, Plus, ChevronDown, ChevronRight, Home,
-  Users, FolderOpen
+  Users, FolderOpen, Mail
 } from 'lucide-react';
 
 const NAV_GROUPS = [
@@ -32,6 +32,7 @@ const NAV_GROUPS = [
       { label: 'Registrations', to: '/admin/registrations', icon: ClipboardList },
       { label: 'Assignments',   to: '/admin/assignments',   icon: UserCheck },
       { label: 'Announcements', to: '/admin/announcements', icon: Megaphone },
+      { label: 'Email Campaigns', to: '/admin/emails',      icon: Mail },
       { label: 'Help Desk',     to: '/admin/tickets',       icon: ClipboardList },
     ],
   },
