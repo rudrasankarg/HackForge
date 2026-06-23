@@ -77,12 +77,6 @@ router.get('/analytics', auth, requireRole('admin', 'organizer'), async (req, re
       totalClicked,
       openRate: parseFloat(openRate.toFixed(2)),
       clickRate: parseFloat(clickRate.toFixed(2)),
-    res.json({
-      totalSent,
-      totalOpened,
-      totalClicked,
-      openRate: parseFloat(openRate.toFixed(2)),
-      clickRate: parseFloat(clickRate.toFixed(2)),
       campaignStats
     });
   } catch (err) {
