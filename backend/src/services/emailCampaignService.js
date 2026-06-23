@@ -91,6 +91,75 @@ const runCampaignChecks = async () => {
       }
     }
 
+    // 3. Submission Deadline Approaching Campaign (Warn within last 24 hours)
+    try {
+      const Hackathon = require('../models/Hackathon');
+      const activeHackathons = await Hackathon.find({
+        status: { $in: ['active', 'submission', 'registration'] },
+        submissionDeadline: { $exists: true, $ne: null }
+      });
+
+      const now = new Date();
+      for (const hackathon of activeHackathons) {
+        const msLeft = new Date(hackathon.submissionDeadline).getTime() - now.getTime();
+        const hoursLeft = msLeft / (1000 * 60 * 60);
+
+        if (hoursLeft > 0 && hoursLeft <= 24) {
+          console.log(`[CAMPAIGN ENGINE] Hackathon "${hackathon.name}" submission deadline is in ${hoursLeft.toFixed(1)} hours. Dispatching warnings...`);
+          
+          const submittedTeams = await Team.find({
+            hackathonId: hackathon._id,
+            projectId: { $ne: null }
+          });
+          
+          const submittedUserIds = new Set();
+          submittedTeams.forEach(t => {
+            if (t.members) {
+              t.members.forEach(m => submittedUserIds.add(m.toString()));
+            }
+          });
+
+          for (const participant of participants) {
+            if (!submittedUserIds.has(participant._id.toString())) {
+              const alreadySent = await EmailTelemetry.findOne({
+                recipientEmail: participant.email,
+                campaignType: 'journey_team_no_submission',
+                subject: { $regex: 'URGENT:.*left to submit', $options: 'i' },
+                sentAt: { $gte: new Date(Date.now() - 12 * 60 * 60 * 1000) }
+              });
+
+              if (!alreadySent) {
+                const html = `
+                  <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px; color: #111827; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px;">
+                    <div style="margin-bottom: 24px;">
+                      <span style="font-size: 20px; font-weight: 700; color: #111827; letter-spacing: -0.5px;">HackForge</span>
+                    </div>
+                    <div style="height: 1px; background-color: #e5e7eb; margin-bottom: 24px;"></div>
+                    <h2 style="font-size: 18px; font-weight: 700; color: #b45309; margin: 0 0 12px 0;">Submission Deadline Approaching!</h2>
+                    <p style="font-size: 15px; line-height: 24px; color: #374151; margin: 0 0 24px 0;">Hello ${participant.name}, the submission deadline for <strong>${hackathon.name}</strong> is approaching quickly! You have less than <strong>${Math.ceil(hoursLeft)} hours</strong> remaining to submit your project.</p>
+                    <p style="font-size: 14px; color: #4b5563; margin-bottom: 24px;">Make sure your team has filled out the project checklist, linked the GitHub repository, added the demo video, and clicked Submit before the portal closes.</p>
+                    <div style="margin-bottom: 24px;">
+                      <a href="${process.env.CLIENT_ORIGIN || 'https://hackforge-4s9q.onrender.com'}/dashboard" style="display: inline-block; background-color: #b45309; color: #ffffff; padding: 12px 24px; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 6px;">Submit Project Now</a>
+                    </div>
+                    <div style="height: 1px; background-color: #e5e7eb; margin-top: 24px; margin-bottom: 16px;"></div>
+                    <p style="font-size: 12px; line-height: 18px; color: #9ca3af; margin: 0;">HackForge team</p>
+                  </div>
+                `;
+                await sendEmail(
+                  participant.email,
+                  `URGENT: ${Math.ceil(hoursLeft)} hours left to submit for ${hackathon.name}!`,
+                  html,
+                  'journey_team_no_submission'
+                );
+              }
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.error('[CAMPAIGN ENGINE ERROR] Failed to run deadline warnings:', err.message);
+    }
+
     console.log('[CAMPAIGN ENGINE] Completed stage-based checks successfully.');
   } catch (err) {
     console.error('[CAMPAIGN ENGINE ERROR] Failed to run checks:', err.message);
