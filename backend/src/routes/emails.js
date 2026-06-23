@@ -191,6 +191,9 @@ router.post('/send-custom', auth, requireRole('admin', 'organizer'), async (req,
           <div style="height: 1px; background-color: #e5e7eb; margin-bottom: 24px;"></div>
           <h2 style="font-size: 18px; font-weight: 700; color: #111827; margin: 0 0 16px 0;">${subject}</h2>
           <p style="font-size: 15px; line-height: 24px; color: #374151; margin: 0 0 24px 0; white-space: pre-wrap;">Hello ${target.name || 'Hacker'},\n\n${body}</p>
+          <div style="margin-top: 28px; margin-bottom: 28px;">
+            <a href="${process.env.CLIENT_ORIGIN || 'https://hackforge-4s9q.onrender.com'}/dashboard" style="display: inline-block; background-color: #ea580c; color: #ffffff; padding: 12px 24px; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 8px; box-shadow: 0 4px 12px rgba(234, 88, 12, 0.2);">Go to HackForge Platform</a>
+          </div>
           <div style="height: 1px; background-color: #e5e7eb; margin-top: 24px; margin-bottom: 16px;"></div>
           <p style="font-size: 12px; line-height: 18px; color: #9ca3af; margin: 0;">HackForge team</p>
         </div>
