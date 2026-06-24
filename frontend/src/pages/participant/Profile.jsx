@@ -64,7 +64,7 @@ export default function ParticipantProfile() {
   const [loading,  setLoading]  = useState(false);
   const [message,  setMessage]  = useState('');
   const [error,    setError]    = useState('');
-  const [formData, setFormData] = useState({ name: '', email: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', preferredLanguage: 'en' });
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('hf_theme') === 'dark');
 
   useEffect(() => {
@@ -77,7 +77,7 @@ export default function ParticipantProfile() {
   }, [darkMode]);
 
   useEffect(() => {
-    if (user) setFormData({ name: user.name || '', email: user.email || '' });
+    if (user) setFormData({ name: user.name || '', email: user.email || '', preferredLanguage: user.preferredLanguage || 'en' });
   }, [user]);
 
   const handleChange = e => setFormData(p => ({ ...p, [e.target.name]: e.target.value }));
@@ -87,7 +87,7 @@ export default function ParticipantProfile() {
     if (!formData.name.trim()) { setError('Name cannot be empty.'); return; }
     setLoading(true); setMessage(''); setError('');
     try {
-      const res = await api.patch('/users/me', { name: formData.name });
+      const res = await api.patch('/users/me', { name: formData.name, preferredLanguage: formData.preferredLanguage });
       login(localStorage.getItem('hf_token'), res);
       setMessage('Profile updated successfully.');
       setTimeout(() => setMessage(''), 4000);
@@ -160,6 +160,24 @@ export default function ParticipantProfile() {
                     onBlur={e => e.target.style.borderColor = T.border}
                     required
                   />
+                </div>
+
+                <div>
+                  <FieldLabel>Preferred Email Language</FieldLabel>
+                  <select
+                    name="preferredLanguage"
+                    value={formData.preferredLanguage}
+                    onChange={handleChange}
+                    style={inputStyle}
+                    onFocus={e => e.target.style.borderColor = T.orange}
+                    onBlur={e => e.target.style.borderColor = T.border}
+                  >
+                    <option value="en">English</option>
+                    <option value="es">Español (Spanish)</option>
+                    <option value="fr">Français (French)</option>
+                    <option value="de">Deutsch (German)</option>
+                    <option value="hi">हिन्दी (Hindi)</option>
+                  </select>
                 </div>
 
                 <div>

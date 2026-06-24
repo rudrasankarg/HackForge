@@ -45,6 +45,7 @@ const NAV_GROUPS = [
       { label: 'Fairness Court', to: '/admin/fairness-court',          icon: Scale },
       { label: 'Bias Monitor',   to: '/admin/bias-explained',        icon: ShieldAlert },
       { label: 'Cheat Shield',   to: '/admin/cheat-shield',          icon: ShieldAlert },
+      { label: 'Promotion AI',   to: '/admin/promotion-ai',          icon: Megaphone },
       { label: 'Analytics',      to: '/admin/analytics',             icon: BarChart3 },
     ],
   },

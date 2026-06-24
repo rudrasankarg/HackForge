@@ -33,6 +33,7 @@ import AiProjectEvaluation from './pages/admin/AiProjectEvaluation';
 import FairnessCourt from './pages/admin/FairnessCourt';
 import CheatShield from './pages/admin/CheatShield';
 import EmailCampaigns from './pages/admin/EmailCampaigns';
+import PromotionAi from './pages/admin/PromotionAi';
 
 
 
@@ -102,6 +103,7 @@ function AppRoutes() {
 
         <Route path="/admin/announcements" element={<ProtectedRoute roles={['admin']}><AdminAnnouncements /></ProtectedRoute>} />
         <Route path="/admin/emails" element={<ProtectedRoute roles={['admin']}><EmailCampaigns /></ProtectedRoute>} />
+        <Route path="/admin/promotion-ai" element={<ProtectedRoute roles={['admin']}><PromotionAi /></ProtectedRoute>} />
         <Route path="/admin/appeals" element={<ProtectedRoute roles={['admin']}><AdminAppeals /></ProtectedRoute>} />
         <Route path="/admin/analytics" element={<ProtectedRoute roles={['admin']}><AdminAnalytics /></ProtectedRoute>} />
         <Route path="/admin/bias-explained" element={<ProtectedRoute roles={['admin']}><AdminBiasExplained /></ProtectedRoute>} />
@@ -127,6 +129,7 @@ function AppRoutes() {
 
         <Route path="/organizer/announcements" element={<ProtectedRoute roles={['organizer']}><AdminAnnouncements /></ProtectedRoute>} />
         <Route path="/organizer/emails" element={<ProtectedRoute roles={['organizer']}><EmailCampaigns /></ProtectedRoute>} />
+        <Route path="/organizer/promotion-ai" element={<ProtectedRoute roles={['organizer']}><PromotionAi /></ProtectedRoute>} />
         <Route path="/organizer/appeals" element={<ProtectedRoute roles={['organizer']}><AdminAppeals /></ProtectedRoute>} />
         <Route path="/organizer/analytics" element={<ProtectedRoute roles={['organizer']}><AdminAnalytics /></ProtectedRoute>} />
         <Route path="/organizer/bias-explained" element={<ProtectedRoute roles={['organizer']}><AdminBiasExplained /></ProtectedRoute>} />

@@ -29,6 +29,8 @@ const organizerRoutes = require('./routes/organizers');
 const ticketRoutes = require('./routes/tickets');
 const aiEvaluationRoutes = require('./routes/aiEvaluations');
 const emailRoutes = require('./routes/emails');
+const promotionsRoutes = require('./routes/promotions');
+
 
 
 
@@ -75,6 +77,7 @@ app.use('/api/organizers', organizerRoutes);
 app.use('/api/tickets', ticketRoutes);
 app.use('/api/ai-evaluation', aiEvaluationRoutes);
 app.use('/api/emails', emailRoutes);
+app.use('/api/promotions', promotionsRoutes);
 
 
 

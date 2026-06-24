@@ -3,6 +3,8 @@ const Team = require('../models/Team');
 const Project = require('../models/Project');
 const EmailTelemetry = require('../models/EmailTelemetry');
 const { sendEmail } = require('./emailService');
+const { runReassignmentChecks } = require('./ai/reviewerReassignmentService');
+
 
 // Perform the journey status check for all users/teams and dispatch emails
 const runCampaignChecks = async () => {
@@ -158,6 +160,38 @@ const runCampaignChecks = async () => {
       }
     } catch (err) {
       console.error('[CAMPAIGN ENGINE ERROR] Failed to run deadline warnings:', err.message);
+    }
+
+    // 4. Process Scheduled Email Queue
+    try {
+      const now = new Date();
+      const scheduledEmails = await EmailTelemetry.find({
+        status: { $in: ['scheduled', 'scheduled_ab'] },
+        sendTimePrediction: { $lte: now }
+      });
+
+      if (scheduledEmails.length > 0) {
+        console.log(`[CAMPAIGN ENGINE] Processing ${scheduledEmails.length} scheduled emails...`);
+        for (const email of scheduledEmails) {
+          await sendEmail(
+            email.recipientEmail,
+            email.subject,
+            email.body,
+            email.campaignType,
+            true // forceImmediate
+          );
+          await EmailTelemetry.findByIdAndDelete(email._id);
+        }
+      }
+    } catch (err) {
+      console.error('[CAMPAIGN ENGINE ERROR] Failed to process scheduled emails:', err.message);
+    }
+
+    // 5. Run Reviewer Reassignment checks
+    try {
+      await runReassignmentChecks();
+    } catch (err) {
+      console.error('[CAMPAIGN ENGINE ERROR] Failed to run reviewer reassignment checks:', err.message);
     }
 
     console.log('[CAMPAIGN ENGINE] Completed stage-based checks successfully.');

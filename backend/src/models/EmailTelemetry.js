@@ -20,13 +20,15 @@ const emailTelemetrySchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['sent', 'failed', 'opened', 'clicked'],
+    enum: ['sent', 'failed', 'opened', 'clicked', 'scheduled', 'scheduled_ab'],
     default: 'sent'
   },
   openedAt: { type: Date, default: null },
   clickedAt: { type: Date, default: null },
   sendTimePrediction: { type: Date, default: null },
   sentAt: { type: Date, default: Date.now },
+  body: { type: String, default: '' },
+  language: { type: String, default: 'en' },
   metadata: { type: mongoose.Schema.Types.Mixed, default: {} }
 }, { timestamps: true });
 

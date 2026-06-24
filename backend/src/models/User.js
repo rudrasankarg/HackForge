@@ -32,6 +32,8 @@ const userSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: true },
   profileComplete: { type: Boolean, default: false },
   lastLogin: { type: Date, default: null },
+  lastActive: { type: Date, default: Date.now },
+  preferredLanguage: { type: String, enum: ['en', 'es', 'fr', 'de', 'hi'], default: 'en' },
   loginAttempts: { type: Number, default: 0 },
   lockUntil: { type: Date, default: null },
 }, { timestamps: true });

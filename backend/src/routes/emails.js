@@ -122,7 +122,19 @@ router.post('/trigger-engine', auth, requireRole('admin', 'organizer'), async (r
   try {
     const { runCampaignChecks } = require('../services/emailCampaignService');
     await runCampaignChecks();
-    res.json({ message: 'Campaign engine triggered successfully. checked participants and teams.' });
+    res.json({ message: 'Campaign engine triggered successfully. Checked participants, teams and scheduled queue.' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 5b. Trigger the reviewer reassignment manually
+router.post('/trigger-reassignment', auth, requireRole('admin', 'organizer'), async (req, res) => {
+  try {
+    const { runReassignmentChecks } = require('../services/ai/reviewerReassignmentService');
+    const inactivityMs = req.query.demo === 'true' ? 0 : 24 * 60 * 60 * 1000;
+    const count = await runReassignmentChecks(inactivityMs);
+    res.json({ message: `Reviewer reassignment checks completed. Reassigned ${count} project(s).`, count });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

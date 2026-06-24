@@ -1,5 +1,37 @@
 const nodemailer = require('nodemailer');
 const EmailTelemetry = require('../models/EmailTelemetry');
+const { callGemini } = require('./gemini');
+
+// Helper to translate text using Gemini if language is not English
+const translateText = async (text, targetLang) => {
+  if (!text || !targetLang || targetLang === 'en') return text;
+  const langNames = { es: 'Spanish', fr: 'French', de: 'German', hi: 'Hindi' };
+  const langName = langNames[targetLang] || targetLang;
+  
+  const prompt = `You are a professional translator. Translate the following text/HTML to ${langName}. Preserve all HTML tags, link formats, and style attributes EXACTLY as they are. Translate only the user-visible content text.
+
+Text/HTML to translate:
+"${text}"
+
+Translation only:`;
+  const translated = await callGemini(prompt);
+  return translated ? translated.trim() : text;
+};
+
+// Helper to attach website link to email footer
+const ensureFooter = (html) => {
+  if (html.includes('https://hackforge-4s9q.onrender.com')) return html;
+  const footerHtml = `
+    <div style="margin-top: 30px; text-align: center; font-size: 13px; color: #6b7280; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+      <p style="margin: 0 0 10px 0;">Access the hackathon portal directly at HackForge:</p>
+      <a href="https://hackforge-4s9q.onrender.com" style="display: inline-block; background-color: #ea580c; color: #ffffff; padding: 10px 20px; font-size: 13px; font-weight: 600; text-decoration: none; border-radius: 6px;">Go to HackForge Portal</a>
+    </div>
+  `;
+  if (html.includes('</body>')) {
+    return html.replace('</body>', `${footerHtml}</body>`);
+  }
+  return html + footerHtml;
+};
 
 // 1. Predict optimal send time based on past opens or high-engagement defaults
 const predictOptimalSendTime = async (recipientEmail) => {
@@ -77,26 +109,68 @@ const createTransporter = () => {
 };
 
 // 3. Send email and record telemetry
-const sendEmail = async (to, subject, html, campaignType = 'announcement') => {
+const sendEmail = async (to, subject, html, campaignType = 'announcement', forceImmediate = false) => {
+  // Get user preferred language and translate
+  let targetLang = 'en';
+  try {
+    const User = require('../models/User');
+    const userRecord = await User.findOne({ email: to });
+    if (userRecord && userRecord.preferredLanguage) {
+      targetLang = userRecord.preferredLanguage;
+    }
+  } catch (err) {
+    console.error('Error fetching user preferred language:', err.message);
+  }
+
+  // Ensure universal website footer is attached
+  let processedHtml = ensureFooter(html);
+
+  // Translate if not English
+  let finalSubject = subject;
+  if (targetLang !== 'en') {
+    try {
+      finalSubject = await translateText(subject, targetLang);
+      processedHtml = await translateText(processedHtml, targetLang);
+    } catch (err) {
+      console.error('Translation failed, sending in English:', err.message);
+    }
+  }
+
   let telemetryId = null;
   let sendTimePrediction = null;
+  let isScheduled = false;
 
   try {
     sendTimePrediction = await predictOptimalSendTime(to);
+    const now = new Date();
+    
+    // If optimal prediction is in the future (more than 5 mins away) and not forced, set to scheduled
+    const isFuture = sendTimePrediction.getTime() - now.getTime() > 5 * 60 * 1000;
+    if (isFuture && !forceImmediate && campaignType !== 'otp' && campaignType !== 'welcome') {
+      isScheduled = true;
+    }
+
     const telemetry = await EmailTelemetry.create({
       recipientEmail: to,
-      subject,
+      subject: finalSubject,
       campaignType,
-      status: 'sent',
-      sendTimePrediction
+      status: isScheduled ? 'scheduled' : 'sent',
+      sendTimePrediction,
+      body: processedHtml,
+      language: targetLang,
+      sentAt: isScheduled ? null : new Date()
     });
     telemetryId = telemetry._id;
   } catch (err) {
     console.error('Failed to initialize telemetry record:', err.message);
   }
 
-  // Wrap links and inject tracking pixel if telemetry record was created successfully
-  const processedHtml = telemetryId ? wrapLinksAndInjectPixel(html, telemetryId) : html;
+  if (isScheduled) {
+    console.log(`[EMAIL QUEUED] Scheduled email for ${to} at ${sendTimePrediction.toISOString()}`);
+    return;
+  }
+
+  const finalHtml = telemetryId ? wrapLinksAndInjectPixel(processedHtml, telemetryId) : processedHtml;
 
   const markFailed = async () => {
     if (telemetryId) {
@@ -121,8 +195,8 @@ const sendEmail = async (to, subject, html, campaignType = 'announcement') => {
         body: JSON.stringify({
           sender: { name: 'HackForge', email: process.env.SMTP_USER || 'noreply@hackforge.dev' },
           to: [{ email: to }],
-          subject,
-          htmlContent: processedHtml
+          subject: finalSubject,
+          htmlContent: finalHtml
         })
       });
       if (res.ok) {
@@ -151,8 +225,8 @@ const sendEmail = async (to, subject, html, campaignType = 'announcement') => {
         body: JSON.stringify({
           from: process.env.SMTP_FROM || 'onboarding@resend.dev',
           to: [to],
-          subject,
-          html: processedHtml
+          subject: finalSubject,
+          html: finalHtml
         })
       });
       if (res.ok) {
@@ -172,19 +246,19 @@ const sendEmail = async (to, subject, html, campaignType = 'announcement') => {
   // 3. Fallback to standard SMTP
   const transporter = createTransporter();
   if (!transporter) {
-    console.log(`[EMAIL FALLBACK] To: ${to} | Subject: ${subject}`);
+    console.log(`[EMAIL FALLBACK] To: ${to} | Subject: ${finalSubject}`);
     return;
   }
   try {
     await transporter.sendMail({
       from: process.env.SMTP_FROM || 'HackForge <noreply@hackforge.dev>',
       to,
-      subject,
-      html: processedHtml,
+      subject: finalSubject,
+      html: finalHtml,
     });
   } catch (err) {
     console.error(`[EMAIL ERROR] Failed to send email via SMTP:`, err.message);
-    console.log(`[EMAIL FALLBACK] To: ${to} | Subject: ${subject}`);
+    console.log(`[EMAIL FALLBACK] To: ${to} | Subject: ${finalSubject}`);
     await markFailed();
   }
 };
