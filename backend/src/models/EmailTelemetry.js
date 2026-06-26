@@ -14,7 +14,8 @@ const emailTelemetrySchema = new mongoose.Schema({
       'journey_team_no_submission',
       'journey_submitted',
       'journey_evaluation_complete',
-      'journey_post_event'
+      'journey_post_event',
+      'daily_promotion'
     ],
     required: true
   },

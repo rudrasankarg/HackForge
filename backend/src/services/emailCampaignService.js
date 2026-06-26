@@ -194,6 +194,54 @@ const runCampaignChecks = async () => {
       console.error('[CAMPAIGN ENGINE ERROR] Failed to run reviewer reassignment checks:', err.message);
     }
 
+    // 6. Daily Promotional Campaign (to promote the website and remind not to unsubscribe)
+    try {
+      const targetHour = parseInt(process.env.DAILY_PROMO_HOUR) || 12; // default to 12 PM (noon)
+      const now = new Date();
+      
+      // Send if we are at or past the target hour and it hasn't been sent yet today
+      if (now.getHours() >= targetHour) {
+        // Query to check if any daily_promotion email was sent today (past 12 hours)
+        const startOfToday = new Date();
+        startOfToday.setHours(0, 0, 0, 0);
+
+        const alreadySentToday = await EmailTelemetry.findOne({
+          campaignType: 'daily_promotion',
+          sentAt: { $gte: startOfToday }
+        });
+
+        if (!alreadySentToday) {
+          console.log('[CAMPAIGN ENGINE] Sending daily website promotional emails...');
+          const activeUsers = await User.find({ isActive: { $ne: false } });
+          const clientOrigin = process.env.CLIENT_ORIGIN || 'https://hackforge-4s9q.onrender.com';
+          
+          for (const targetUser of activeUsers) {
+            const html = `
+              <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px; color: #111827; background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px;">
+                <div style="margin-bottom: 24px;">
+                  <span style="font-size: 20px; font-weight: 700; color: #111827; letter-spacing: -0.5px;">HackForge</span>
+                </div>
+                <div style="height: 1px; background-color: #e5e7eb; margin-bottom: 24px;"></div>
+                <h2 style="font-size: 18px; font-weight: 700; color: #111827; margin: 0 0 12px 0;">Build the Future with HackForge!</h2>
+                <p style="font-size: 15px; line-height: 24px; color: #374151; margin: 0 0 24px 0;">Hello ${targetUser.name || 'Hacker'},</p>
+                <p style="font-size: 15px; line-height: 24px; color: #374151; margin: 0 0 24px 0;">Discover new opportunities, collaborate with top talent, and build amazing products on HackForge, the ultimate hackathon management platform.</p>
+                <div style="margin-bottom: 24px;">
+                  <a href="${clientOrigin}" style="display: inline-block; background-color: #ea580c; color: #ffffff; padding: 12px 24px; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 6px;">Visit HackForge Now</a>
+                </div>
+                <p style="font-size: 13px; line-height: 20px; color: #ef4444; font-weight: 600; margin: 0 0 24px 0;">Important: Please do not unsubscribe from these daily updates to ensure you receive crucial announcements and team building requests.</p>
+                <div style="height: 1px; background-color: #e5e7eb; margin-top: 24px; margin-bottom: 16px;"></div>
+                <p style="font-size: 12px; line-height: 18px; color: #9ca3af; margin: 0;">HackForge team</p>
+              </div>
+            `;
+            // sendEmail(to, subject, html, campaignType, forceImmediate)
+            await sendEmail(targetUser.email, 'Promoting Innovation: Join HackForge Today!', html, 'daily_promotion', true);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('[CAMPAIGN ENGINE ERROR] Failed to run daily promotion:', err.message);
+    }
+
     console.log('[CAMPAIGN ENGINE] Completed stage-based checks successfully.');
   } catch (err) {
     console.error('[CAMPAIGN ENGINE ERROR] Failed to run checks:', err.message);
