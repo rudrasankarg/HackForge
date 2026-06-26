@@ -199,8 +199,22 @@ const runCampaignChecks = async () => {
       const targetHour = parseInt(process.env.DAILY_PROMO_HOUR) || 12; // default to 12 PM (noon)
       const now = new Date();
       
+      // Get current hour in target timezone (default Asia/Kolkata for GMT+05:30)
+      const targetTimezone = process.env.TZ || process.env.TIMEZONE || 'Asia/Kolkata';
+      let currentHour = now.getHours();
+      try {
+        const localHourString = new Intl.DateTimeFormat('en-US', {
+          timeZone: targetTimezone,
+          hour: 'numeric',
+          hour12: false
+        }).format(now);
+        currentHour = parseInt(localHourString);
+      } catch (tzErr) {
+        console.error('[CAMPAIGN ENGINE] Error formatting timezone, defaulting to system hour:', tzErr.message);
+      }
+
       // Send if we are at or past the target hour and it hasn't been sent yet today
-      if (now.getHours() >= targetHour) {
+      if (currentHour >= targetHour) {
         // Query to check if any daily_promotion email was sent today (past 12 hours)
         const startOfToday = new Date();
         startOfToday.setHours(0, 0, 0, 0);
