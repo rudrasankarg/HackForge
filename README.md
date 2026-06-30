@@ -31,7 +31,7 @@ A full-stack, AI-powered hackathon management platform built with the MERN stack
 - AI feedback generation via Google Gemini (with deterministic fallback)
 - Results normalization and ranking
 
-**Participant Experience**
+**Participant Experiences**
 - Self-service team creation and join-by-invite-code
 - Project submission with GitHub + demo URL
 - Real-time general chat (Socket.IO)
