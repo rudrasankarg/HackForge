@@ -102,4 +102,4 @@ function assignReviewers(projects, reviewers, reviewersPerProject = 2) {
   return { assignments, processingMs: Date.now() - start };
 }
 
-module.exports = { assignReviewers };
+module.exports = { assignReviewers, scoreAssignment };
