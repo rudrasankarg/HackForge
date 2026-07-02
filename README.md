@@ -49,7 +49,7 @@ A full-stack, AI-powered hackathon management platform built with the MERN stack
 
 ---
 
-## Tech Stack
+## Tech Stacks
 
 | Layer | Technology |
 |---|---|
