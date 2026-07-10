@@ -53,7 +53,7 @@ A full-stack, AI-powered hackathon management platform built with the MERN stack
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 18, Vite, React Router v6, Recharts, Socket.IO Client |
+| Frontend | React 18, Vite, Recharts, Socket.IO Client |
 | Backend | Node.js, Express, Socket.IO |
 | Database | MongoDB + Mongoose |
 | Auth | JWT (7-day), bcryptjs, token blacklist |
