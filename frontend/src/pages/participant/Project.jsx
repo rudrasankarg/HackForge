@@ -4,6 +4,7 @@ import { api } from '../../api';
 import { ExternalLink, Video, Send, CheckCircle, AlertCircle } from 'lucide-react';
 import Github from '../../components/GithubIcon';
 import GithubHealthAnalyzer from '../../components/GithubHealthAnalyzer';
+import ProjectQA from '../../components/ProjectQA';
 
 export default function SubmitProject() {
   const [form, setForm] = useState({ title: '', description: '', techStack: '', domain: '', githubUrl: '', demoUrl: '', videoUrl: '' });
@@ -115,6 +116,8 @@ export default function SubmitProject() {
             </button>
           </form>
         </div>
+
+        {existing && <ProjectQA projectId={existing._id} initialQuestions={existing.questions} />}
       </main>
     </div>
   );

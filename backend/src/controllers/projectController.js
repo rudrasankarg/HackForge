@@ -236,4 +236,59 @@ const getGithubHealth = async (req, res) => {
   }
 };
 
-module.exports = { getProjects, getProject, submitProject, publishResults, updateStatus, getGithubHealth };
+const askQuestion = async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text || !text.trim()) {
+      return res.status(400).json({ message: 'Question text is required.' });
+    }
+
+    const project = await Project.findById(req.params.id);
+    if (!project) return res.status(404).json({ message: 'Project not found.' });
+
+    project.questions.push({
+      asker: {
+        userId: req.user._id,
+        name: req.user.name,
+        role: req.user.role
+      },
+      text: text.trim()
+    });
+
+    await project.save();
+    res.status(201).json(project.questions[project.questions.length - 1]);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+const answerQuestion = async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text || !text.trim()) {
+      return res.status(400).json({ message: 'Answer text is required.' });
+    }
+
+    const project = await Project.findById(req.params.id);
+    if (!project) return res.status(404).json({ message: 'Project not found.' });
+
+    const question = project.questions.id(req.params.questionId);
+    if (!question) return res.status(404).json({ message: 'Question not found.' });
+
+    question.answers.push({
+      responder: {
+        userId: req.user._id,
+        name: req.user.name,
+        role: req.user.role
+      },
+      text: text.trim()
+    });
+
+    await project.save();
+    res.status(201).json(question);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+module.exports = { getProjects, getProject, submitProject, publishResults, updateStatus, getGithubHealth, askQuestion, answerQuestion };

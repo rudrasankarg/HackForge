@@ -5,6 +5,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, ExternalLink, ShieldOff, AlertTriangle } from 'lucide-react';
 import Github from '../../components/GithubIcon';
 import GithubHealthAnalyzer from '../../components/GithubHealthAnalyzer';
+import ProjectQA from '../../components/ProjectQA';
 import { toast } from '../../utils/toast';
 
 const CRITERIA = [
@@ -144,8 +145,9 @@ export default function Evaluate() {
         )}
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start' }}>
-          <div className="card no-text-cursor">
-            <h2 style={{ fontSize: 17, fontWeight: 700, marginBottom: 20 }}>Evaluation Rubric</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <div className="card no-text-cursor" style={{ margin: 0 }}>
+              <h2 style={{ fontSize: 17, fontWeight: 700, marginBottom: 20 }}>Evaluation Rubric</h2>
             <form onSubmit={handleSubmit}>
               {CRITERIA.map((c) => (
                 <div key={c.key} style={{ background: 'var(--bg-elevated)', padding: 16, borderRadius: 'var(--radius)', marginBottom: 12 }} className="no-text-cursor">
@@ -281,8 +283,10 @@ export default function Evaluate() {
               </div>
             </form>
           </div>
+          {project && <ProjectQA projectId={projectId} initialQuestions={project.questions} />}
+        </div>
 
-          <div style={{ position: 'sticky', top: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div style={{ position: 'sticky', top: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
             <GithubHealthAnalyzer projectId={projectId} />
             <div className="card" style={{ margin: 0 }}>
               <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Project Details</h3>

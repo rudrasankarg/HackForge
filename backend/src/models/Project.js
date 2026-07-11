@@ -24,6 +24,28 @@ const projectSchema = new mongoose.Schema({
   feedback: { type: String, default: '' },
   confidenceScore: { type: Number, default: null },
   isPublished: { type: Boolean, default: false },
+  questions: [
+    {
+      asker: {
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+        name: { type: String, required: true },
+        role: { type: String, required: true }
+      },
+      text: { type: String, required: true },
+      createdAt: { type: Date, default: Date.now },
+      answers: [
+        {
+          responder: {
+            userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+            name: { type: String, required: true },
+            role: { type: String, required: true }
+          },
+          text: { type: String, required: true },
+          createdAt: { type: Date, default: Date.now }
+        }
+      ]
+    }
+  ]
 }, { timestamps: true });
 
 module.exports = mongoose.model('Project', projectSchema);
