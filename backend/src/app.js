@@ -31,6 +31,7 @@ const aiEvaluationRoutes = require('./routes/aiEvaluations');
 const emailRoutes = require('./routes/emails');
 const promotionsRoutes = require('./routes/promotions');
 const matchmakingRoutes = require('./routes/matchmaking');
+const kanbanRoutes = require('./routes/kanban');
 const githubAnalyticsRoutes = require('./routes/githubAnalytics');
 
 
@@ -81,6 +82,7 @@ app.use('/api/ai-evaluation', aiEvaluationRoutes);
 app.use('/api/emails', emailRoutes);
 app.use('/api/promotions', promotionsRoutes);
 app.use('/api/matchmaking', matchmakingRoutes);
+app.use('/api/kanban', kanbanRoutes);
 app.use('/api/githubAnalytics', githubAnalyticsRoutes);
 
 
