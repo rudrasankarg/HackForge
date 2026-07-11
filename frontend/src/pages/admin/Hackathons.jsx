@@ -10,7 +10,7 @@ import { useAuth } from '../../context/AuthContext';
 const EMPTY_FORM = {
   name: '', description: '', theme: '', maxTeamSize: 4, minTeamSize: 1,
   registrationDeadline: '', submissionDeadline: '', status: 'upcoming', maxParticipants: 200,
-  prizes: '', rules: '', createdBy: '',
+  prizes: '', rules: '', createdBy: '', faqs: [],
 };
 
 export default function AdminHackathons() {
@@ -82,6 +82,7 @@ export default function AdminHackathons() {
       status: h.status || 'upcoming', maxParticipants: h.maxParticipants || 200,
       prizes: h.prizes || '', rules: h.rules || '',
       createdBy: h.createdBy?._id || h.createdBy || '',
+      faqs: h.faqs || [],
     });
     setEditing(h._id);
     setShowForm(true);
@@ -168,8 +169,68 @@ export default function AdminHackathons() {
                     </select>
                   </div>
                 )}
+
+                {/* FAQ Builder */}
+                <div className="form-group" style={{ gridColumn: 'span 2', marginTop: 14 }}>
+                  <label className="form-label" style={{ fontWeight: 700 }}>Interactive FAQ Builder</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 12 }}>
+                    {(form.faqs || []).map((faq, idx) => (
+                      <div key={idx} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', background: 'var(--bg-elevated)', padding: 10, borderRadius: 8, border: '1px solid var(--border)' }}>
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                          <input 
+                            type="text" 
+                            placeholder="Question" 
+                            value={faq.question}
+                            onChange={(e) => {
+                              const nextFaqs = [...form.faqs];
+                              nextFaqs[idx].question = e.target.value;
+                              setForm(p => ({ ...p, faqs: nextFaqs }));
+                            }}
+                            className="form-input"
+                            style={{ height: 32, fontSize: 12 }}
+                            required
+                          />
+                          <input 
+                            type="text" 
+                            placeholder="Answer" 
+                            value={faq.answer}
+                            onChange={(e) => {
+                              const nextFaqs = [...form.faqs];
+                              nextFaqs[idx].answer = e.target.value;
+                              setForm(p => ({ ...p, faqs: nextFaqs }));
+                            }}
+                            className="form-input"
+                            style={{ height: 32, fontSize: 12 }}
+                            required
+                          />
+                        </div>
+                        <button 
+                          type="button" 
+                          onClick={() => {
+                            const nextFaqs = form.faqs.filter((_, i) => i !== idx);
+                            setForm(p => ({ ...p, faqs: nextFaqs }));
+                          }}
+                          className="btn btn-secondary"
+                          style={{ color: 'var(--danger)', background: 'transparent', border: 'none', padding: 8, cursor: 'pointer' }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      const nextFaqs = [...(form.faqs || []), { question: '', answer: '' }];
+                      setForm(p => ({ ...p, faqs: nextFaqs }));
+                    }}
+                    className="btn btn-secondary btn-sm"
+                  >
+                    + Add FAQ
+                  </button>
+                </div>
               </div>
-              <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+              <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
                 <button type="submit" className="btn btn-primary" disabled={submitting}>
                   {submitting ? <><div className="spinner" style={{ width: 13, height: 13 }} /> Saving...</> : editing ? 'Update Hackathon' : 'Create Hackathon'}
                 </button>

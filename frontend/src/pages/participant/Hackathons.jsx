@@ -438,6 +438,31 @@ export default function ParticipantHackathons() {
                 </form>
               </div>
             )}
+
+            {/* FAQ Viewer */}
+            {selectedEvent.faqs && selectedEvent.faqs.length > 0 && (
+              <div style={{
+                background: C.surface, border: `1px solid ${C.border}`,
+                borderRadius: 14, overflow: 'hidden', marginBottom: 24, padding: '24px 28px'
+              }}>
+                <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 15, color: C.text, marginBottom: 16 }}>
+                  💬 Frequently Asked Questions (FAQ)
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {selectedEvent.faqs.map((faq, idx) => (
+                    <details key={idx} style={{ background: C.elevated, border: `1px solid ${C.border}`, borderRadius: 10, padding: 12, cursor: 'pointer' }}>
+                      <summary style={{ fontWeight: 700, fontSize: 13, color: C.text, listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        {faq.question}
+                        <span style={{ fontSize: 11, color: C.muted }}>▼</span>
+                      </summary>
+                      <p style={{ marginTop: 8, fontSize: 13, color: C.sub, lineHeight: 1.6 }}>
+                        {faq.answer}
+                      </p>
+                    </details>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </main>
       </div>
