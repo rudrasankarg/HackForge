@@ -10,5 +10,6 @@ router.get('/', ctrl.getTickets);
 router.get('/:id', ctrl.getTicket);
 router.post('/:id/reply', ctrl.replyTicket);
 router.patch('/:id/status', requireRole('admin', 'organizer', 'reviewer'), ctrl.updateTicketStatus);
+router.post('/:id/claim', requireRole('admin', 'organizer', 'reviewer'), ctrl.claimTicket);
 
 module.exports = router;

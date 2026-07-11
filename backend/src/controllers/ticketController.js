@@ -82,6 +82,7 @@ const getTickets = async (req, res) => {
 
     const tickets = await Ticket.find(filter)
       .populate('userId', 'name email role')
+      .populate('assignedTo', 'name email role')
       .populate('hackathonId', 'nameTheme name')
       .sort({ updatedAt: -1 });
     res.json(tickets);
@@ -95,6 +96,7 @@ const getTicket = async (req, res) => {
   try {
     const ticket = await Ticket.findById(req.params.id)
       .populate('userId', 'name email role')
+      .populate('assignedTo', 'name email role')
       .populate('replies.sender', 'name email role');
     
     if (!ticket) return res.status(404).json({ message: 'Ticket not found.' });
@@ -226,10 +228,31 @@ const updateTicketStatus = async (req, res) => {
   }
 };
 
+const claimTicket = async (req, res) => {
+  try {
+    const ticket = await Ticket.findById(req.params.id);
+    if (!ticket) return res.status(404).json({ message: 'Ticket not found.' });
+
+    ticket.status = 'in-progress';
+    ticket.assignedTo = req.user._id;
+    await ticket.save();
+
+    const populated = await Ticket.findById(ticket._id)
+      .populate('userId', 'name email role')
+      .populate('assignedTo', 'name email role')
+      .populate('replies.sender', 'name email role');
+
+    res.json(populated);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 module.exports = {
   createTicket,
   getTickets,
   getTicket,
   replyTicket,
-  updateTicketStatus
+  updateTicketStatus,
+  claimTicket
 };

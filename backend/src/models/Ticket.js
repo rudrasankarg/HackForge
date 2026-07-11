@@ -4,9 +4,10 @@ const ticketSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   hackathonId: { type: mongoose.Schema.Types.ObjectId, ref: 'Hackathon', required: false },
   subject: { type: String, required: true, trim: true },
-  category: { type: String, enum: ['technical', 'logistics', 'judging', 'other'], default: 'technical' },
+  category: { type: String, enum: ['technical', 'logistics', 'judging', 'other', 'mentor_request'], default: 'technical' },
   description: { type: String, required: true },
   status: { type: String, enum: ['open', 'in-progress', 'resolved'], default: 'open' },
+  assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   replies: [
     {
       sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

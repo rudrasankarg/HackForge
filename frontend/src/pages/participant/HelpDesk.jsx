@@ -18,6 +18,7 @@ const CATEGORIES = [
   { value: 'technical',  label: 'Technical Support' },
   { value: 'logistics',  label: 'Event Logistics'   },
   { value: 'judging',    label: 'Judging & Rules'   },
+  { value: 'mentor_request', label: 'Mentor Assistance (Code Help)' },
   { value: 'other',      label: 'Other Queries'     },
 ];
 
@@ -57,6 +58,20 @@ export default function HelpDesk() {
       setTickets(p => p.map(t => t._id === updated._id ? updated : t));
     } catch (err) {
       setError(err.message || 'Failed to resolve ticket.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleClaimTicket = async () => {
+    if (!selectedTicket) return;
+    setSubmitting(true);
+    try {
+      const updated = await api.post(`/tickets/${selectedTicket._id}/claim`);
+      setSelectedTicket(updated);
+      setTickets(p => p.map(t => t._id === updated._id ? updated : t));
+    } catch (err) {
+      setError(err.message || 'Failed to claim ticket.');
     } finally {
       setSubmitting(false);
     }
@@ -233,13 +248,21 @@ export default function HelpDesk() {
                     </div>
                     <span style={{ fontSize:12, color:C.muted }}>{getCatLabel(selectedTicket.category)} · {new Date(selectedTicket.createdAt).toLocaleDateString()}{` · Scope: ${selectedTicket.hackathonId ? selectedTicket.hackathonId.name : "Website / Platform"}`}</span>
                   </div>
-                  {['admin', 'organizer', 'reviewer'].includes(user?.role) && selectedTicket.status !== 'resolved' && (
-                    <button onClick={handleResolveTicket} disabled={submitting}
-                      style={{ padding:'0 14px', height:32, background:'#10b981', color:'#fff', border:'none', borderRadius:6, cursor:'pointer', fontSize:12, fontWeight:600, transition:'all 0.15s' }}
-                      onMouseEnter={e => e.currentTarget.style.background='#059669'} onMouseLeave={e => e.currentTarget.style.background='#10b981'}>
-                      {submitting ? 'Closing...' : '✓ Resolve & Close'}
-                    </button>
-                  )}
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {['admin', 'organizer', 'reviewer'].includes(user?.role) && selectedTicket.status === 'open' && (
+                      <button onClick={handleClaimTicket} disabled={submitting}
+                        style={{ padding:'0 14px', height:32, background:'var(--brand)', color:'#fff', border:'none', borderRadius:6, cursor:'pointer', fontSize:12, fontWeight:600, transition:'all 0.15s' }}>
+                        {submitting ? 'Claiming...' : '🙋 Claim Ticket'}
+                      </button>
+                    )}
+                    {['admin', 'organizer', 'reviewer'].includes(user?.role) && selectedTicket.status !== 'resolved' && (
+                      <button onClick={handleResolveTicket} disabled={submitting}
+                        style={{ padding:'0 14px', height:32, background:'#10b981', color:'#fff', border:'none', borderRadius:6, cursor:'pointer', fontSize:12, fontWeight:600, transition:'all 0.15s' }}
+                        onMouseEnter={e => e.currentTarget.style.background='#059669'} onMouseLeave={e => e.currentTarget.style.background='#10b981'}>
+                        {submitting ? 'Closing...' : '✓ Resolve & Close'}
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div style={{ flex:1, overflowY:'auto', padding:'24px 32px', display:'flex', flexDirection:'column', gap:14 }}>
                   <div style={{ padding:'16px 20px', borderRadius:12, background:C.surface, border:`1px solid ${C.border}`, maxWidth:680 }}>
