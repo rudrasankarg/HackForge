@@ -4,6 +4,7 @@ import Sidebar from '../../components/Sidebar';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, ExternalLink, ShieldOff, AlertTriangle } from 'lucide-react';
 import Github from '../../components/GithubIcon';
+import GithubHealthAnalyzer from '../../components/GithubHealthAnalyzer';
 import { toast } from '../../utils/toast';
 
 const CRITERIA = [
@@ -281,8 +282,10 @@ export default function Evaluate() {
             </form>
           </div>
 
-          <div className="card" style={{ position: 'sticky', top: 24 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Project Details</h3>
+          <div style={{ position: 'sticky', top: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <GithubHealthAnalyzer projectId={projectId} />
+            <div className="card" style={{ margin: 0 }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Project Details</h3>
             <div style={{ marginBottom: 16 }}>
               <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Title</div>
               <div style={{ fontWeight: 700 }}>{project.title}</div>
@@ -313,6 +316,7 @@ export default function Evaluate() {
             )}
           </div>
         </div>
+      </div>
       </main>
     </div>
   );

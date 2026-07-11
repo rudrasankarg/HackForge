@@ -3,6 +3,7 @@ import Sidebar from '../../components/Sidebar';
 import { api } from '../../api';
 import { ExternalLink, Video, Send, CheckCircle, AlertCircle } from 'lucide-react';
 import Github from '../../components/GithubIcon';
+import GithubHealthAnalyzer from '../../components/GithubHealthAnalyzer';
 
 export default function SubmitProject() {
   const [form, setForm] = useState({ title: '', description: '', techStack: '', domain: '', githubUrl: '', demoUrl: '', videoUrl: '' });
@@ -55,6 +56,8 @@ export default function SubmitProject() {
             </span>
           </div>
         )}
+
+        {existing && <GithubHealthAnalyzer projectId={existing._id} />}
 
         <div className="card" style={{ maxWidth: 720 }}>
           <form onSubmit={handleSubmit}>
