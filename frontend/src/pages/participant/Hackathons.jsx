@@ -194,6 +194,61 @@ export default function ParticipantHackathons() {
               ))}
             </div>
 
+            {/* Visual Timeline Tracker */}
+            <div style={{
+              background: C.surface, border: `1px solid ${C.border}`,
+              borderRadius: 14, padding: '24px 28px', marginBottom: 24,
+            }}>
+              <h3 style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, fontSize: 15, color: C.text, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Clock size={16} color="var(--brand)" /> Live Event Agenda & Milestone Tracker
+              </h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', overflowX: 'auto', padding: '10px 0' }}>
+                {/* Horizontal line */}
+                <div style={{ position: 'absolute', top: 25, left: '5%', right: '5%', height: 3, background: 'var(--border)', zIndex: 1 }} />
+                
+                {[
+                  { label: 'Registration Open', date: selectedEvent.createdAt || new Date(new Date(selectedEvent.startDate).getTime() - 10*24*60*60*1000) },
+                  { label: 'Registration Deadline', date: selectedEvent.registrationDeadline },
+                  { label: 'Hacking Kickoff', date: selectedEvent.startDate },
+                  { label: 'Submission Deadline', date: selectedEvent.submissionDeadline },
+                  { label: 'Closing Ceremony & Results', date: selectedEvent.endDate },
+                ].map((milestone, idx, arr) => {
+                  const mDate = new Date(milestone.date);
+                  const now = new Date();
+                  const isPassed = now > mDate;
+                  const isCurrent = !isPassed && (idx === 0 || now > new Date(arr[idx-1].date));
+
+                  return (
+                    <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', width: '18%', zIndex: 2, position: 'relative' }}>
+                      <div style={{
+                        width: 32, height: 32, borderRadius: '50%',
+                        background: isPassed ? 'var(--success)' : isCurrent ? 'var(--brand)' : 'var(--bg-elevated)',
+                        border: isCurrent ? '3px solid #fff' : '3px solid var(--border)',
+                        color: isPassed || isCurrent ? '#fff' : 'var(--text-muted)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontWeight: 700, fontSize: 12, marginBottom: 8,
+                        boxShadow: isCurrent ? '0 0 10px var(--brand)' : 'none',
+                        transition: 'all 0.3s ease'
+                      }}>
+                        {isPassed ? '✓' : idx + 1}
+                      </div>
+                      <span style={{ fontSize: 11, fontWeight: isCurrent ? 800 : 600, color: isCurrent ? 'var(--brand)' : isPassed ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                        {milestone.label}
+                      </span>
+                      <span style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 4 }}>
+                        {mDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                      {isCurrent && (
+                        <div style={{ marginTop: 10, background: 'var(--brand-dim)', border: '1px solid var(--brand-border)', borderRadius: 6, padding: '3px 8px', fontSize: 10, color: 'var(--brand)', fontWeight: 700 }}>
+                          Active Phase
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* My Team for this Hackathon */}
             <div style={{
               background: C.surface, border: `1px solid ${C.border}`,
