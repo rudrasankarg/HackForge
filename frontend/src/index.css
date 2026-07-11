@@ -48,6 +48,27 @@
   --bg-header: rgba(250, 248, 244, 0.9);
 }
 
+.dark-theme {
+  --bg-base: #0b0f17;
+  --bg-surface: #111827;
+  --bg-elevated: #1f2937;
+  --bg-overlay: #374151;
+
+  --brand: #f97316;
+  --brand-light: #fb923c;
+  --brand-dim: rgba(249, 115, 22, 0.08);
+  --brand-border: rgba(249, 115, 22, 0.25);
+
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --text-muted: #9ca3af;
+
+  --border: rgba(243, 244, 246, 0.12);
+  --border-focus: #f3f4f6;
+  --hover-bg: rgba(243, 244, 246, 0.06);
+  --bg-header: rgba(11, 15, 23, 0.9);
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 /* Set default cursors to prevent I-beam on regular text/elements globally */

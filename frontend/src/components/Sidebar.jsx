@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -7,7 +7,7 @@ import {
   BrainCircuit, ShieldAlert, Fingerprint,
   Scale, FileText, Settings,
   LogOut, Plus, ChevronDown, ChevronRight, Home,
-  Users, FolderOpen, Mail, BarChart3
+  Users, FolderOpen, Mail, BarChart3, Sun, Moon
 } from 'lucide-react';
 
 const NAV_GROUPS = [
@@ -66,6 +66,20 @@ export default function Sidebar({ biasAlertCount = 0 }) {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem('theme') === 'dark';
+  });
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark-theme');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark-theme');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDarkMode]);
+
   const initOpen = {};
   NAV_GROUPS.forEach(g => { initOpen[g.key] = g.defaultOpen; });
   const [open, setOpen] = useState(initOpen);
@@ -110,10 +124,19 @@ export default function Sidebar({ biasAlertCount = 0 }) {
         className="fixed left-0 top-0 h-screen flex flex-col z-50"
         style={{ width: 248, background: 'var(--bg-surface)', borderRight: '1px solid var(--border)' }}
       >
-        <Link to={prefix} className="px-5 py-5 flex items-center gap-3" style={{ borderBottom: '1px solid var(--border)', cursor: 'pointer', textDecoration: 'none' }}>
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs" style={{ background: 'var(--text-primary)', color: 'var(--bg-surface)' }}>HF</div>
-          <span className="font-extrabold tracking-tight" style={{ fontSize: 17, color: 'var(--text-primary)' }}>HackForge</span>
-        </Link>
+        <div className="px-5 py-5 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border)' }}>
+          <Link to={prefix} className="flex items-center gap-3" style={{ cursor: 'pointer', textDecoration: 'none' }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs" style={{ background: 'var(--text-primary)', color: 'var(--bg-surface)' }}>HF</div>
+            <span className="font-extrabold tracking-tight" style={{ fontSize: 17, color: 'var(--text-primary)' }}>HackForge</span>
+          </Link>
+          <button
+            onClick={() => setIsDarkMode(!isDarkMode)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-primary)' }}
+            title="Toggle theme"
+          >
+            {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+        </div>
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
           {navItems.map(item => (
             <NavLink key={item.to} to={item.to} end={item.end}
@@ -177,10 +200,19 @@ export default function Sidebar({ biasAlertCount = 0 }) {
       style={{ width: 252, background: 'var(--bg-surface)', borderRight: '1px solid var(--border)' }}
     >
       {/* Brand */}
-      <Link to={prefix} className="px-5 py-5 flex items-center gap-3 flex-shrink-0" style={{ borderBottom: '1px solid var(--border)', cursor: 'pointer', textDecoration: 'none' }}>
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs" style={{ background: 'var(--text-primary)', color: 'var(--bg-surface)' }}>HF</div>
-        <span className="font-extrabold tracking-tight" style={{ fontSize: 17, color: 'var(--text-primary)' }}>HackForge</span>
-      </Link>
+      <div className="px-5 py-5 flex items-center justify-between flex-shrink-0" style={{ borderBottom: '1px solid var(--border)' }}>
+        <Link to={prefix} className="flex items-center gap-3" style={{ cursor: 'pointer', textDecoration: 'none' }}>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs" style={{ background: 'var(--text-primary)', color: 'var(--bg-surface)' }}>HF</div>
+          <span className="font-extrabold tracking-tight" style={{ fontSize: 17, color: 'var(--text-primary)' }}>HackForge</span>
+        </Link>
+        <button
+          onClick={() => setIsDarkMode(!isDarkMode)}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-primary)' }}
+          title="Toggle theme"
+        >
+          {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
+        </button>
+      </div>
 
       {/* Accordion Nav */}
       <nav className="flex-1 overflow-y-auto px-4 py-4">
