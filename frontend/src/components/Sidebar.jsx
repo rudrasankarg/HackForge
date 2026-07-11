@@ -67,16 +67,16 @@ export default function Sidebar({ biasAlertCount = 0 }) {
   const location = useLocation();
 
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    return localStorage.getItem('theme') === 'dark';
+    return localStorage.getItem('hf_theme') === 'dark';
   });
 
   useEffect(() => {
     if (isDarkMode) {
-      document.documentElement.classList.add('dark-theme');
-      localStorage.setItem('theme', 'dark');
+      document.body.classList.add('dark-theme');
+      localStorage.setItem('hf_theme', 'dark');
     } else {
-      document.documentElement.classList.remove('dark-theme');
-      localStorage.setItem('theme', 'light');
+      document.body.classList.remove('dark-theme');
+      localStorage.setItem('hf_theme', 'light');
     }
   }, [isDarkMode]);
 
@@ -106,6 +106,7 @@ export default function Sidebar({ biasAlertCount = 0 }) {
       return [
         { label: 'Dashboard', to: '/participant', icon: Home, end: true },
         { label: 'Hackathons', to: '/participant/hackathons', icon: CalendarDays },
+        { label: 'Matchmaking', to: '/participant/matchmaking', icon: UsersRound },
         { label: 'My Team', to: '/participant/team', icon: UsersRound },
         { label: 'Submit Project', to: '/participant/submit', icon: FolderOpen },
         { label: 'Announcements', to: '/participant/announcements', icon: Megaphone },

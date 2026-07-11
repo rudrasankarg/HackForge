@@ -50,6 +50,7 @@ import ParticipantAppeal from './pages/participant/Appeal';
 import ParticipantHackathons from './pages/participant/Hackathons';
 import ParticipantHelpDesk from './pages/participant/HelpDesk';
 import ParticipantProfile from './pages/participant/Profile';
+import ParticipantMatchmaking from './pages/participant/Matchmaking';
 import ChatbotWidget from './components/ChatbotWidget';
 
 function ProtectedRoute({ children, roles }) {
@@ -157,6 +158,7 @@ function AppRoutes() {
         <Route path="/participant/hackathons" element={<ProtectedRoute roles={['participant']}><ParticipantHackathons /></ProtectedRoute>} />
         <Route path="/participant/help-desk" element={<ProtectedRoute roles={['participant']}><ParticipantHelpDesk /></ProtectedRoute>} />
         <Route path="/participant/profile" element={<ProtectedRoute roles={['participant']}><ParticipantProfile /></ProtectedRoute>} />
+        <Route path="/participant/matchmaking" element={<ProtectedRoute roles={['participant']}><ParticipantMatchmaking /></ProtectedRoute>} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>

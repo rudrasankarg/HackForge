@@ -30,6 +30,7 @@ const ticketRoutes = require('./routes/tickets');
 const aiEvaluationRoutes = require('./routes/aiEvaluations');
 const emailRoutes = require('./routes/emails');
 const promotionsRoutes = require('./routes/promotions');
+const matchmakingRoutes = require('./routes/matchmaking');
 
 
 
@@ -78,6 +79,7 @@ app.use('/api/tickets', ticketRoutes);
 app.use('/api/ai-evaluation', aiEvaluationRoutes);
 app.use('/api/emails', emailRoutes);
 app.use('/api/promotions', promotionsRoutes);
+app.use('/api/matchmaking', matchmakingRoutes);
 
 
 
