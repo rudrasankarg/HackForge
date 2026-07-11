@@ -34,10 +34,26 @@ export default function Evaluate() {
       if (found.evaluation) {
         setForm({ innovation: found.evaluation.scores?.innovation || 5, technical: found.evaluation.scores?.technical || 5, uiux: found.evaluation.scores?.uiux || 5, feasibility: found.evaluation.scores?.feasibility || 5, impact: found.evaluation.scores?.impact || 5, feedback: found.evaluation.feedback || '' });
         setSuccess(found.evaluated);
+      } else {
+        const savedDraft = localStorage.getItem(`draft_eval_${projectId}`);
+        if (savedDraft) {
+          try {
+            setForm(JSON.parse(savedDraft));
+            toast.info('Restored unsaved draft evaluation');
+          } catch (e) {
+            console.error('Failed to parse draft evaluation', e);
+          }
+        }
       }
       setLoading(false);
     }).catch(() => { setAccessDenied(true); setLoading(false); });
   }, [projectId]);
+
+  useEffect(() => {
+    if (project && !success) {
+      localStorage.setItem(`draft_eval_${projectId}`, JSON.stringify(form));
+    }
+  }, [form, project, success, projectId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -73,6 +89,7 @@ export default function Evaluate() {
         feedback: form.feedback,
       });
       setSuccess(true);
+      localStorage.removeItem(`draft_eval_${projectId}`);
       toast.success("Evaluation submitted successfully!");
       setTimeout(() => navigate('/reviewers'), 1500);
     } catch (err) {
