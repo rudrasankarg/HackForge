@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar';
 import { api } from '../../api';
+import { useAuth } from '../../context/AuthContext';
 import { ExternalLink, Video, Send, CheckCircle, AlertCircle } from 'lucide-react';
 import Github from '../../components/GithubIcon';
 import GithubHealthAnalyzer from '../../components/GithubHealthAnalyzer';
 import ProjectQA from '../../components/ProjectQA';
 
 export default function SubmitProject() {
+  const { user } = useAuth();
+  const [showCertificate, setShowCertificate] = useState(false);
   const [form, setForm] = useState({ title: '', description: '', techStack: '', domain: '', githubUrl: '', demoUrl: '', videoUrl: '' });
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
@@ -51,10 +54,19 @@ export default function SubmitProject() {
         {success && <div className="alert alert-success" style={{ marginBottom: 16 }}><CheckCircle size={15} />{success}</div>}
 
         {existing && (
-          <div style={{ marginBottom: 16 }}>
+          <div style={{ marginBottom: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
             <span className={`badge badge-${existing.status === 'evaluated' ? 'success' : existing.status === 'submitted' ? 'primary' : 'muted'}`}>
               Status: {existing.status}
             </span>
+            {(existing.status === 'submitted' || existing.status === 'evaluated') && (
+              <button 
+                onClick={() => setShowCertificate(true)} 
+                className="btn btn-secondary btn-sm"
+                style={{ background: 'var(--brand-dim)', color: 'var(--brand)', border: '1px solid var(--brand-border)', borderRadius: 8, padding: '4px 12px', fontSize: 12, fontWeight: 700 }}
+              >
+                🎓 Claim Certificate
+              </button>
+            )}
           </div>
         )}
 
@@ -119,6 +131,75 @@ export default function SubmitProject() {
 
         {existing && <ProjectQA projectId={existing._id} initialQuestions={existing.questions} />}
       </main>
+
+      {showCertificate && existing && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(15,23,42,0.95)', zIndex: 1000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: 20
+        }} className="no-print">
+          <div style={{
+            background: '#faf8f5', color: '#1e293b',
+            width: '100%', maxWidth: 840,
+            padding: 50, borderRadius: 16, border: '12px double #cbd5e1',
+            textAlign: 'center', position: 'relative',
+            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+            fontFamily: 'serif'
+          }} id="certificate-print-area">
+            <button 
+              onClick={() => setShowCertificate(false)}
+              className="no-print"
+              style={{
+                position: 'absolute', top: 20, right: 20,
+                background: 'rgba(0,0,0,0.05)', border: 'none',
+                borderRadius: '50%', width: 32, height: 32,
+                cursor: 'pointer', fontWeight: 'bold',
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}
+            >
+              ✕
+            </button>
+
+            <h1 style={{ fontSize: 32, color: 'var(--brand)', marginBottom: 8, fontFamily: 'Sora, sans-serif', fontWeight: 800 }}>HACKFORGE</h1>
+            <div style={{ height: 2, background: 'var(--brand)', width: 100, margin: '12px auto 24px auto' }} />
+            
+            <p style={{ fontSize: 16, textTransform: 'uppercase', letterSpacing: '0.15em', margin: 0, color: '#475569' }}>Certificate of Participation</p>
+            <p style={{ fontSize: 14, fontStyle: 'italic', margin: '14px 0', color: '#64748b' }}>This is proudly presented to</p>
+            
+            <h2 style={{ fontSize: 36, fontWeight: 700, margin: '10px 0', fontFamily: 'Sora, sans-serif', color: '#0f172a' }}>{user?.name}</h2>
+            
+            <div style={{ height: 1, background: '#cbd5e1', width: '60%', margin: '16px auto' }} />
+            
+            <p style={{ fontSize: 15, lineHeight: 1.6, maxWidth: 580, margin: '20px auto', color: '#334155' }}>
+              for successfully submitting the project <strong>{existing.title}</strong> in the hackathon, demonstrating exceptional technical execution, creativity, and collaborative drive.
+            </p>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: 48 }}>
+              <div>
+                <div style={{ borderBottom: '1px solid #cbd5e1', width: 160, paddingBottom: 6, fontWeight: 'bold', fontSize: 13 }}>HackForge Committee</div>
+                <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>Organizing Body</div>
+              </div>
+              <div>
+                <div style={{ borderBottom: '1px solid #cbd5e1', width: 160, paddingBottom: 6, fontWeight: 'bold', fontSize: 13 }}>{new Date(existing.createdAt).toLocaleDateString()}</div>
+                <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>Date Issued</div>
+              </div>
+            </div>
+
+            <p style={{ fontSize: 9, color: '#94a3b8', marginTop: 40, fontFamily: 'monospace' }}>
+              Verification ID: HACKFORGE-{existing._id.toUpperCase()}
+            </p>
+
+            <button 
+              onClick={() => window.print()}
+              className="btn btn-primary no-print"
+              style={{ marginTop: 24, padding: '10px 24px', background: 'var(--brand)', color: '#fff', borderRadius: 8, fontWeight: 600, border: 'none' }}
+            >
+              🖨 Print / Save as PDF
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

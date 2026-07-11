@@ -1370,3 +1370,25 @@ body.dark-theme .hover\:text-red-600:hover {
   -webkit-user-select: text !important;
 }
 
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #certificate-print-area, #certificate-print-area * {
+    visibility: visible;
+  }
+  #certificate-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: none !important;
+    box-shadow: none !important;
+    background: #faf8f5 !important;
+    color: #1e293b !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
