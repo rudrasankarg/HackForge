@@ -2,11 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../api';
 import Sidebar from '../../components/Sidebar';
 import { Link } from 'react-router-dom';
-import { ClipboardList, ExternalLink, CheckCircle, Clock } from 'lucide-react';
+import { ClipboardList, ExternalLink, CheckCircle, Clock, Star, Bookmark } from 'lucide-react';
 
 export default function ReviewerDashboard() {
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [bookmarks, setBookmarks] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('reviewer_bookmarks') || '[]');
+    } catch {
+      return [];
+    }
+  });
+  const [filter, setFilter] = useState('all'); // all, bookmarked
 
   useEffect(() => {
     api.get('/evaluations/assigned').then((res) => {
@@ -14,6 +22,14 @@ export default function ReviewerDashboard() {
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
+
+  const toggleBookmark = (projectId) => {
+    const next = bookmarks.includes(projectId)
+      ? bookmarks.filter(id => id !== projectId)
+      : [...bookmarks, projectId];
+    setBookmarks(next);
+    localStorage.setItem('reviewer_bookmarks', JSON.stringify(next));
+  };
 
   const done = assignments.filter((a) => a.evaluated).length;
   const pending = assignments.filter((a) => !a.evaluated).length;
@@ -42,6 +58,24 @@ export default function ReviewerDashboard() {
           </div>
         </div>
 
+        {/* Tab filters */}
+        {!loading && assignments.length > 0 && (
+          <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
+            <button 
+              onClick={() => setFilter('all')}
+              style={{ padding: '6px 14px', borderRadius: 20, border: 'none', background: filter === 'all' ? 'var(--brand)' : 'var(--bg-elevated)', color: filter === 'all' ? '#fff' : 'var(--text-primary)', fontWeight: 600 }}
+            >
+              All Assignments ({assignments.length})
+            </button>
+            <button 
+              onClick={() => setFilter('bookmarked')}
+              style={{ padding: '6px 14px', borderRadius: 20, border: 'none', background: filter === 'bookmarked' ? 'var(--brand)' : 'var(--bg-elevated)', color: filter === 'bookmarked' ? '#fff' : 'var(--text-primary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}
+            >
+              <Star size={13} fill={filter === 'bookmarked' ? '#fff' : 'transparent'} /> Shortlisted ({bookmarks.length})
+            </button>
+          </div>
+        )}
+
         {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}><div className="spinner" /></div>
         ) : assignments.length === 0 ? (
@@ -52,8 +86,16 @@ export default function ReviewerDashboard() {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {assignments.map((a) => (
+            {assignments.filter(a => filter === 'all' || bookmarks.includes(a.project?._id)).map((a) => (
               <div key={a.assignment._id} className="card" style={{ display: 'flex', alignItems: 'center', gap: 20, padding: '16px 20px' }}>
+                <button 
+                  onClick={() => toggleBookmark(a.project?._id)} 
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', color: bookmarks.includes(a.project?._id) ? '#eab308' : 'var(--text-muted)' }}
+                  title={bookmarks.includes(a.project?._id) ? 'Remove Shortlist' : 'Shortlist Project'}
+                >
+                  <Star size={18} fill={bookmarks.includes(a.project?._id) ? '#eab308' : 'transparent'} />
+                </button>
+
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>{a.project?.title}</div>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
