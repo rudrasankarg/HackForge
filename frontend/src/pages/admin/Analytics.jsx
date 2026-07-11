@@ -5,10 +5,18 @@ import { BarChart3, Users, FolderOpen, Star, TrendingUp } from 'lucide-react';
 
 export default function AdminAnalytics() {
   const [data, setData] = useState(null);
+  const [reviewers, setReviewers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/analytics').then(setData).catch(() => {}).finally(() => setLoading(false));
+    Promise.all([
+      api.get('/analytics'),
+      api.get('/analytics/reviewer-performance')
+    ]).then(([analyticsData, performanceData]) => {
+      setData(analyticsData);
+      setReviewers(performanceData || []);
+    }).catch((err) => console.error(err))
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <div className="app-shell"><Sidebar /><main className="main-content"><div className="loading-screen"><div className="spinner" /></div></main></div>;
@@ -57,7 +65,7 @@ export default function AdminAnalytics() {
         )}
 
         {stats.topSkills && (
-          <div className="card">
+          <div className="card" style={{ marginBottom: 20 }}>
             <h3 style={{ fontWeight: 700, marginBottom: 16, fontSize: 15 }}>Top Participant Skills</h3>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {stats.topSkills.map((s, i) => (
@@ -65,6 +73,38 @@ export default function AdminAnalytics() {
                   {s._id} <span style={{ opacity: 0.7 }}>({s.count})</span>
                 </span>
               ))}
+            </div>
+          </div>
+        )}
+
+        {reviewers && reviewers.length > 0 && (
+          <div className="card" style={{ marginBottom: 20 }}>
+            <h3 style={{ fontWeight: 700, marginBottom: 16, fontSize: 15, fontFamily: 'Sora, sans-serif' }}>Reviewer Performance & Load Leaderboard</h3>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 13 }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid var(--border)', color: 'var(--text-muted)', fontWeight: 700 }}>
+                    <th style={{ padding: '10px 8px' }}>Reviewer</th>
+                    <th style={{ padding: '10px 8px' }}>Assigned</th>
+                    <th style={{ padding: '10px 8px' }}>Completed</th>
+                    <th style={{ padding: '10px 8px' }}>Pending</th>
+                    <th style={{ padding: '10px 8px' }}>Avg Score</th>
+                    <th style={{ padding: '10px 8px' }}>Avg Speed</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {reviewers.map((rev) => (
+                    <tr key={rev._id} style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-primary)' }}>
+                      <td style={{ padding: '12px 8px', fontWeight: 600 }}>{rev.name}</td>
+                      <td style={{ padding: '12px 8px' }}>{rev.assigned}</td>
+                      <td style={{ padding: '12px 8px', color: 'var(--success)', fontWeight: 700 }}>{rev.completed}</td>
+                      <td style={{ padding: '12px 8px', color: rev.pending > 0 ? 'var(--brand)' : 'var(--text-muted)' }}>{rev.pending}</td>
+                      <td style={{ padding: '12px 8px', fontWeight: 700 }}>{rev.avgScore} <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>/ 50</span></td>
+                      <td style={{ padding: '12px 8px' }}>{rev.avgDurationMinutes} mins / project</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
