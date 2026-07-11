@@ -14,6 +14,65 @@ export default function AdminResults() {
   const [publishing, setPublishing] = useState(false);
   const [published, setPublished] = useState(false);
 
+  const [totalBudget, setTotalBudget] = useState(5000);
+  const [prizeAllocations, setPrizeAllocations] = useState([
+    { rank: 1, amount: 2500, category: 'Grand Prize Winner', projectId: '' },
+    { rank: 2, amount: 1500, category: 'Runner Up', projectId: '' },
+    { rank: 3, amount: 750, category: 'Second Runner Up', projectId: '' },
+    { rank: 4, amount: 250, category: 'Best UI/UX Design', projectId: '' }
+  ]);
+
+  // Load from localStorage per selected hackathon
+  useEffect(() => {
+    if (!selected) return;
+    const savedBudget = localStorage.getItem(`budget_${selected}`);
+    const savedAllocations = localStorage.getItem(`allocations_${selected}`);
+    if (savedBudget) setTotalBudget(Number(savedBudget));
+    else setTotalBudget(5000);
+    if (savedAllocations) {
+      try {
+        setPrizeAllocations(JSON.parse(savedAllocations));
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      setPrizeAllocations([
+        { rank: 1, amount: 2500, category: 'Grand Prize Winner', projectId: '' },
+        { rank: 2, amount: 1500, category: 'Runner Up', projectId: '' },
+        { rank: 3, amount: 750, category: 'Second Runner Up', projectId: '' },
+        { rank: 4, amount: 250, category: 'Best UI/UX Design', projectId: '' }
+      ]);
+    }
+  }, [selected]);
+
+  const savePrizeData = (budget, allocations) => {
+    localStorage.setItem(`budget_${selected}`, budget);
+    localStorage.setItem(`allocations_${selected}`, JSON.stringify(allocations));
+  };
+
+  const handleUpdateAmount = (index, amount) => {
+    const next = [...prizeAllocations];
+    next[index].amount = Number(amount);
+    setPrizeAllocations(next);
+    savePrizeData(totalBudget, next);
+  };
+
+  const handleUpdateProject = (index, projectId) => {
+    const next = [...prizeAllocations];
+    next[index].projectId = projectId;
+    setPrizeAllocations(next);
+    savePrizeData(totalBudget, next);
+  };
+
+  const handleAddCategory = () => {
+    const next = [...prizeAllocations, { rank: prizeAllocations.length + 1, amount: 0, category: 'Custom Category', projectId: '' }];
+    setPrizeAllocations(next);
+    savePrizeData(totalBudget, next);
+  };
+
+  const allocatedBudget = prizeAllocations.reduce((sum, item) => sum + item.amount, 0);
+  const remainingBudget = totalBudget - allocatedBudget;
+
   useEffect(() => {
     api.get('/hackathons').then((h) => { setHackathons(h); if (h.length) setSelected(h[0]._id); }).catch(() => {});
   }, []);
@@ -108,6 +167,76 @@ export default function AdminResults() {
                 </div>
                 <div className="stat-label">Total Evaluations</div>
               </div>
+            </div>
+
+            {/* Budget & Prize Distribution Tracker */}
+            <div className="card" style={{ marginBottom: 24, padding: 22, border: '1px solid var(--border)', background: 'var(--bg-surface)', borderRadius: 14 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 16 }}>
+                <div>
+                  <h3 style={{ fontSize: 16, fontWeight: 700, fontFamily: 'Sora, sans-serif', color: 'var(--text-primary)', margin: 0 }}>Interactive Budget & Prize Tracker</h3>
+                  <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>Allocate prize pools dynamically to team submissions</p>
+                </div>
+                <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
+                  <div>
+                    <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', display: 'block', marginBottom: 4 }}>Total Budget ($)</label>
+                    <input 
+                      type="number" 
+                      value={totalBudget} 
+                      onChange={(e) => { setTotalBudget(Number(e.target.value)); savePrizeData(Number(e.target.value), prizeAllocations); }} 
+                      style={{ width: 120, padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg-elevated)', color: 'var(--text-primary)', fontSize: 13, fontWeight: 700 }}
+                    />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 4 }}>Allocated</div>
+                    <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>${allocatedBudget}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 4 }}>Remaining</div>
+                    <div style={{ fontSize: 15, fontWeight: 800, color: remainingBudget >= 0 ? 'var(--success)' : 'var(--danger)' }}>
+                      ${remainingBudget}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14, marginBottom: 16 }}>
+                {prizeAllocations.map((item, idx) => (
+                  <div key={idx} style={{ padding: 14, borderRadius: 10, background: 'var(--bg-elevated)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 8 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>{item.category}</span>
+                      <input 
+                        type="number" 
+                        value={item.amount} 
+                        onChange={(e) => handleUpdateAmount(idx, e.target.value)}
+                        style={{ width: 80, padding: '4px 6px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 11, fontWeight: 700, textAlign: 'right' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: 2 }}>Awarded To</label>
+                      <select 
+                        value={item.projectId} 
+                        onChange={(e) => handleUpdateProject(idx, e.target.value)}
+                        style={{ width: '100%', padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 11 }}
+                      >
+                        <option value="">Select project...</option>
+                        {results.map((res) => (
+                          <option key={res.project._id} value={res.project._id}>
+                            #{res.rank} - {res.project.title} ({res.project.teamName})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <button 
+                onClick={handleAddCategory} 
+                className="btn btn-secondary btn-sm"
+                style={{ alignSelf: 'flex-start' }}
+              >
+                + Add Custom Prize Tier
+              </button>
             </div>
 
             <div className="card" style={{ padding: 0 }}>
