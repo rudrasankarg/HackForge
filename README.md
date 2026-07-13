@@ -20,7 +20,7 @@ A full-stack, AI-powered hackathon management platform built with the MERN stack
 - Conflict-of-interest detection
 
 **Real Time Bias Detector**
-- Z-score statistical outlier detection per reviewer
+- Z-score statistical outlier detection
 - Technology stack bias monitoring
 - Demographic scoring pattern analysis
 - Unresolved bias alert dashboard with admin resolution workflow
