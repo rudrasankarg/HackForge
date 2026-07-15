@@ -26,7 +26,7 @@ A full-stack, AI-powered hackathon management platform built with the MERN stack
 - Unresolved bias alert dashboard with admin resolution workflow
 
 **AI-Powered Evaluation**
-- Configurable multi-criteria scoring rubric per hackathon
+- Configurable multi-criteria scoring rubric
 - Per-criteria weighted scoring with automatic total calculation
 - AI feedback generation via Google Gemini (with deterministic fallback)
 - Results normalization and ranking
