@@ -36,7 +36,6 @@ A full-stack, AI-powered hackathon management platform built with the MERN stack
 - Project submission with GitHub + demo URL
 - Real-time general chat (Socket.IO)
 - Announcement feed (pinned, role-targeted)
-- Evaluation appeal system with admin review
 - Star-rating feedback portal with anonymous option
 
 **Organizer Dashboard**
