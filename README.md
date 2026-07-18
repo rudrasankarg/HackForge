@@ -20,13 +20,13 @@ A full-stack, AI-powered hackathon management platform built with the MERN stack
 - Conflict-of-interest detection
 
 **Real Time Bias Detector**
-- Z-score statistical outlier detection per reviewer
+- Z-score statistical outlier detection
 - Technology stack bias monitoring
 - Demographic scoring pattern analysis
 - Unresolved bias alert dashboard with admin resolution workflow
 
 **AI-Powered Evaluation**
-- Configurable multi-criteria scoring rubric per hackathon
+- Configurable multi-criteria scoring rubric
 - Per-criteria weighted scoring with automatic total calculation
 - AI feedback generation via Google Gemini (with deterministic fallback)
 - Results normalization and ranking
@@ -36,7 +36,6 @@ A full-stack, AI-powered hackathon management platform built with the MERN stack
 - Project submission with GitHub + demo URL
 - Real-time general chat (Socket.IO)
 - Announcement feed (pinned, role-targeted)
-- Evaluation appeal system with admin review
 - Star-rating feedback portal with anonymous option
 
 **Organizer Dashboard**
