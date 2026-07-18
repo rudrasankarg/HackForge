@@ -8,7 +8,7 @@ const assignmentSchema = new mongoose.Schema({
   expertiseScore: { type: Number, default: 0 },
   workloadScore: { type: Number, default: 0 },
   conflictScore: { type: Number, default: 0 },
-  assignedBy: { type: String, enum: ['ai', 'manual'], default: 'ai' },
+  assignedBy: { type: String, enum: ['ai', 'manual', 'ai_reassigned'], default: 'ai' },
   status: { type: String, enum: ['pending', 'accepted', 'completed'], default: 'pending' },
 }, { timestamps: true });
 
