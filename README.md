@@ -6,7 +6,7 @@ A full-stack, AI-powered hackathon management platform built with the MERN stack
 
 ## Features
 
-**Intelligent Registrations**
+**Intelligent Registration**
 - OTP email verification via Nodemailer before account creation
 - Real-time duplicate detection using Levenshtein distance scoring
 - Automated skill extraction and experience classification
