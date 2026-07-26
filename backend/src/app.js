@@ -193,6 +193,24 @@ io.on('connection', (socket) => {
 
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/hackforge';
 
+const startSelfPing = () => {
+  const url = process.env.RENDER_EXTERNAL_URL || process.env.APP_URL;
+  if (!url) {
+    console.log('Self-ping not configured (RENDER_EXTERNAL_URL or APP_URL not set).');
+    return;
+  }
+  console.log(`Self-ping service started for: ${url}`);
+  // Ping every 10 minutes (600000ms) to prevent Render from sleeping
+  setInterval(() => {
+    const lib = url.startsWith('https') ? require('https') : require('http');
+    lib.get(`${url}/api/health`, (res) => {
+      console.log(`Self-ping successful: ${res.statusCode}`);
+    }).on('error', (err) => {
+      console.error('Self-ping failed:', err.message);
+    });
+  }, 10 * 60 * 1000);
+};
+
 mongoose.connect(MONGO_URI).then(() => {
   console.log('MongoDB connected');
   try {
@@ -201,7 +219,9 @@ mongoose.connect(MONGO_URI).then(() => {
   } catch (err) {
     console.error('Failed to start email campaign service:', err.message);
   }
-  server.listen(process.env.PORT || 5000, () =>
-    console.log(`HackForge API running on port ${process.env.PORT || 5000}`)
-  );
+  server.listen(process.env.PORT || 5000, () => {
+    console.log(`HackForge API running on port ${process.env.PORT || 5000}`);
+    startSelfPing();
+  });
 }).catch((err) => { console.error('DB connection failed', err); process.exit(1); });
+
