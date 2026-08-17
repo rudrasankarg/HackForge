@@ -1,4 +1,4 @@
-# HackForge — A AI-Enabled Hackathon Management Platform
+# HackForge — AI-Enabled Hackathon Management Platform
 
 A full-stack, AI-powered hackathon management platform built with the MERN stack. HackForge automates the entire event lifecycle — from intelligent participant registration to real-time bias detection and automated result publishing.
 
