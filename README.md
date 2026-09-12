@@ -4,7 +4,7 @@ A full-stack, AI-powered hackathon management system that is built using the MER
 
 ---
 
-## Features
+## Feature
 
 **Intelligent Registration**
 - OTP email verification via Nodemailer before account creation
