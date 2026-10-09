@@ -6,7 +6,7 @@ A full-stack, AI-powered hackathon management system that has been built by usin
 
 ## Feature
 
-**Intelligent Registration**
+**Intelligent Registrations**
 - OTP email verification via Nodemailer before account creation
 - Real-time duplicate detection using Levenshtein distance scoring
 - Automated skill extraction and experience classification
