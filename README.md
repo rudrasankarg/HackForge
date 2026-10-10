@@ -13,7 +13,7 @@ A full-stack, AI-powered hackathon management system that has been built by usin
 - University validation against a curated institution list
 - Fraud/duplicate participant flagging with AI confidence scores
 
-**Smart Reviewer Assignment**
+**Smart Reviewer Assignments**
 - Multi-objective optimization matching reviewer expertise to project domains
 - TF-IDF cosine similarity for expertise matching
 - Workload balancing across reviewers
