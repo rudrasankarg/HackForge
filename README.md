@@ -19,7 +19,7 @@ A full-stack, AI-powered hackathon management system that has been built by usin
 - Workload balancing across reviewers
 - Conflict-of-interest detection
 
-**Real Time Bias Detector**
+**Real Time Bias Detection**
 - Z-score statistical outlier detection
 - Technology stack bias monitoring
 - Demographic scoring pattern analysis
