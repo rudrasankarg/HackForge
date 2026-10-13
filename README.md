@@ -32,7 +32,7 @@ A full-stack, AI-powered hackathon management system that has been built by usin
 - Results normalization and ranking
 
 **Participant Experience**
-- Self-service team creation and join-by-invite-code
+- Self-service team creation and joining by-invite-code
 - Project submission with GitHub + demo URL
 - Real-time general chat (Socket.IO)
 - Announcement feed (pinned, role-targeted)
